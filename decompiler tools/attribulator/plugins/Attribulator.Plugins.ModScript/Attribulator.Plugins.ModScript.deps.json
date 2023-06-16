@@ -1,0 +1,244 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v3.1",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "Attribulator.Plugins.ModScript/2.0.0": {
+        "dependencies": {
+          "Attribulator.API": "2.0.0",
+          "Attribulator.ModScript.API": "2.0.0",
+          "CommandLineParser": "2.8.0",
+          "JetBrains.Annotations": "2020.1.0",
+          "Microsoft.Extensions.Logging.Abstractions": "2.0.0"
+        },
+        "runtime": {
+          "Attribulator.Plugins.ModScript.dll": {}
+        }
+      },
+      "CommandLineParser/2.8.0": {
+        "runtime": {
+          "lib/netstandard2.0/CommandLine.dll": {
+            "assemblyVersion": "2.8.0.0",
+            "fileVersion": "2.8.0.0"
+          }
+        }
+      },
+      "JetBrains.Annotations/2020.1.0": {
+        "runtime": {
+          "lib/netstandard2.0/JetBrains.Annotations.dll": {
+            "assemblyVersion": "2020.1.0.0",
+            "fileVersion": "2020.1.0.0"
+          }
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/3.1.5": {
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "assemblyVersion": "3.1.5.0",
+            "fileVersion": "3.100.520.27009"
+          }
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions/2.0.0": {
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.17205"
+          }
+        }
+      },
+      "MSBuildGitHash/0.5.0": {},
+      "MvvmCross/6.4.1": {
+        "runtime": {
+          "lib/netcoreapp2.1/MvvmCross.dll": {
+            "assemblyVersion": "6.4.1.0",
+            "fileVersion": "6.4.1.0"
+          }
+        }
+      },
+      "NFSTools.Core.Data/1.0.2": {
+        "runtime": {
+          "lib/netstandard2.0/CoreLibraries.Data.dll": {
+            "assemblyVersion": "1.0.2.0",
+            "fileVersion": "1.0.2.0"
+          }
+        }
+      },
+      "NFSTools.Core.GameUtilities/1.0.4": {
+        "runtime": {
+          "lib/netstandard2.0/CoreLibraries.GameUtilities.dll": {
+            "assemblyVersion": "1.0.4.0",
+            "fileVersion": "1.0.4.0"
+          }
+        }
+      },
+      "NFSTools.Core.IO/1.0.3": {
+        "runtime": {
+          "lib/netstandard2.0/CoreLibraries.IO.dll": {
+            "assemblyVersion": "1.0.3.0",
+            "fileVersion": "1.0.3.0"
+          }
+        }
+      },
+      "NFSTools.Core.ModuleSystem/1.0.3": {
+        "dependencies": {
+          "NFSTools.Core.GameUtilities": "1.0.4",
+          "System.ComponentModel.Composition": "4.7.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/CoreLibraries.ModuleSystem.dll": {
+            "assemblyVersion": "1.0.3.0",
+            "fileVersion": "1.0.3.0"
+          }
+        }
+      },
+      "System.ComponentModel.Composition/4.7.0": {
+        "runtime": {
+          "lib/netcoreapp2.0/System.ComponentModel.Composition.dll": {
+            "assemblyVersion": "4.0.1.0",
+            "fileVersion": "4.700.19.56404"
+          }
+        }
+      },
+      "VaultLib.Core/1.1.3": {
+        "dependencies": {
+          "MSBuildGitHash": "0.5.0",
+          "MvvmCross": "6.4.1",
+          "NFSTools.Core.Data": "1.0.2",
+          "NFSTools.Core.GameUtilities": "1.0.4",
+          "NFSTools.Core.IO": "1.0.3",
+          "NFSTools.Core.ModuleSystem": "1.0.3",
+          "System.ComponentModel.Composition": "4.7.0"
+        },
+        "runtime": {
+          "lib/netcoreapp3.0/VaultLib.Core.dll": {
+            "assemblyVersion": "1.1.3.0",
+            "fileVersion": "1.1.3.0"
+          }
+        }
+      },
+      "Attribulator.API/2.0.0": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "3.1.5",
+          "VaultLib.Core": "1.1.3"
+        },
+        "runtime": {
+          "Attribulator.API.dll": {}
+        }
+      },
+      "Attribulator.ModScript.API/2.0.0": {
+        "dependencies": {
+          "Attribulator.API": "2.0.0",
+          "JetBrains.Annotations": "2020.1.0"
+        },
+        "runtime": {
+          "Attribulator.ModScript.API.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Attribulator.Plugins.ModScript/2.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "CommandLineParser/2.8.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-eco2HlKQBY4Joz9odHigzGpVzv6pjsXnY5lziioMveQxr+i2Z7xYcIOMeZTgYiqnMtMAbXMXsVhrNfWO5vJS8Q==",
+      "path": "commandlineparser/2.8.0",
+      "hashPath": "commandlineparser.2.8.0.nupkg.sha512"
+    },
+    "JetBrains.Annotations/2020.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kD9D2ey3DGeLbfIzS8PkwLFkcF5vCOLk2rdjgfSxTfpoyovl7gAyoS6yq6T77zo9QgJGaVJ7PO/cSgLopnKlzg==",
+      "path": "jetbrains.annotations/2020.1.0",
+      "hashPath": "jetbrains.annotations.2020.1.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/3.1.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-2VSCj2TZPMdeEi279Lawi6qJQu4+sEWizSOYrhY6hapyS1jxn1jVUZT1Ugv68bya+x8+3lD4+RqhUZql9PhISQ==",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/3.1.5",
+      "hashPath": "microsoft.extensions.dependencyinjection.abstractions.3.1.5.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Logging.Abstractions/2.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-6ZCllUYGFukkymSTx3Yr0G/ajRxoNJp7/FqSxSB4fGISST54ifBhgu4Nc0ItGi3i6DqwuNd8SUyObmiC++AO2Q==",
+      "path": "microsoft.extensions.logging.abstractions/2.0.0",
+      "hashPath": "microsoft.extensions.logging.abstractions.2.0.0.nupkg.sha512"
+    },
+    "MSBuildGitHash/0.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-4+0XB7ainXRUJGvDGEJxV+K5nFdMFXc4wdY2gO4vpM9nISg3jZ1zEioUtZwlHegYQv8+wdq4rynzaPidtCi7Fg==",
+      "path": "msbuildgithash/0.5.0",
+      "hashPath": "msbuildgithash.0.5.0.nupkg.sha512"
+    },
+    "MvvmCross/6.4.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-SvV1SKvNnFwVDg1r2BWI4x1bXXzqNj2OsbEEw8W/Mvw2AbfzG9xIjOO6HBbtxVxM6vc3riWUcO5vvSiBeTeuTA==",
+      "path": "mvvmcross/6.4.1",
+      "hashPath": "mvvmcross.6.4.1.nupkg.sha512"
+    },
+    "NFSTools.Core.Data/1.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-udYYHMrCiyhjYuZdvhHuPfZtV+YdC7YSp8vUJXNSRbKs+I9shmT7mC8P6msygGF/lLxNTEJx671va4VvZ8R45g==",
+      "path": "nfstools.core.data/1.0.2",
+      "hashPath": "nfstools.core.data.1.0.2.nupkg.sha512"
+    },
+    "NFSTools.Core.GameUtilities/1.0.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1cD/7qaP48vsDQQx7VieJJpgaRT/IqRc7U2CBdQzKQzbP0p3mtI3UsOs82i7/lZCWshLPr+AlTrWCcup1fiq0Q==",
+      "path": "nfstools.core.gameutilities/1.0.4",
+      "hashPath": "nfstools.core.gameutilities.1.0.4.nupkg.sha512"
+    },
+    "NFSTools.Core.IO/1.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-PKPpYTqeLadtJdGcNNPqsH3iEJJaUEM+OBCJI5s1MibqtNdnnJ2tj9H3GUAXUbp1LWxQ4iRHIuOYE+UODKCx/Q==",
+      "path": "nfstools.core.io/1.0.3",
+      "hashPath": "nfstools.core.io.1.0.3.nupkg.sha512"
+    },
+    "NFSTools.Core.ModuleSystem/1.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-6A3he4Gc/ExG0tZJIKvKN6O8xn11N/v4mVyEn8cAwJrgufK26XX53YyMTPFf8vDFrq660YXVUNf1OE5RloboTA==",
+      "path": "nfstools.core.modulesystem/1.0.3",
+      "hashPath": "nfstools.core.modulesystem.1.0.3.nupkg.sha512"
+    },
+    "System.ComponentModel.Composition/4.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TKOHGbuqp7++lEna7+p19kTR8rKeAeoo2Faab2n2q7spV2CWPevmUkghMG6POKfSdeQhtAJoNZ33FT+01CNe3g==",
+      "path": "system.componentmodel.composition/4.7.0",
+      "hashPath": "system.componentmodel.composition.4.7.0.nupkg.sha512"
+    },
+    "VaultLib.Core/1.1.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-K7lrcY8i1xGvTmanE6IihbSyYwvjw/gXpF7suOaKpC9KcfNU0nZMvGbZRixupJJHH9NWjdxyEREpPBYVuBSkaA==",
+      "path": "vaultlib.core/1.1.3",
+      "hashPath": "vaultlib.core.1.1.3.nupkg.sha512"
+    },
+    "Attribulator.API/2.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Attribulator.ModScript.API/2.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

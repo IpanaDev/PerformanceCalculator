@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="PerfCalculator:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/PerfCalculator_jar</output-path>
+    <root id="archive" name="PerfCalculator.jar">
+      <element id="module-output" name="PerfCalculator" />
+    </root>
+  </artifact>
+</component>
