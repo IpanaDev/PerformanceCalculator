@@ -39,6 +39,7 @@ public class PerformanceMenu extends Menu {
     }
 
     private void setupButtons() {
+        //Test
         JButton find = gui().createButton("Find",20,520, 80, 25, null);
         find.setToolTipText("Find the best combination.");
         find.addActionListener(action -> {
