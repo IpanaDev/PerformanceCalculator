@@ -1,7 +1,5 @@
 # PerformanceCalculator
-Thanks to [NFSTools](https://github.com/NFSTools) for creating [attribulator](https://github.com/NFSTools/Attribulator).
-
-Thanks to [LeoCodes21](https://github.com/LeoCodes21) for creating [worldlangedit](https://github.com/WorldUnitedNFS/worldlangedit).
+Thanks to [LeoCodes21](https://github.com/LeoCodes21) for creating [worldlangedit](https://github.com/WorldUnitedNFS/worldlangedit) and [attribulator](https://github.com/NFSTools/Attribulator).
 
 # Q/A
 * How am I supposed to be up to date?
