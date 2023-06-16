@@ -16,3 +16,4 @@ Thanks to [LeoCodes21](https://github.com/LeoCodes21) and [redbluescreen](https:
 # NOTES
 * [Java 8](https://www.java.com/en/download) must be installed on your computer
 * DO NOT DELETE decompiler tools folder.
+* Only works on windows
