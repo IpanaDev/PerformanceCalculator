@@ -1,6 +1,8 @@
 package cars;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -9,7 +11,7 @@ public class Cars {
 
     public static void init() throws IOException {
         File file = new File("cars.txt");
-        FileReader fileReader = new FileReader(file);
+        InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(file.toPath()), StandardCharsets.UTF_8);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
         String line;
         while ((line = bufferedReader.readLine()) != null) {

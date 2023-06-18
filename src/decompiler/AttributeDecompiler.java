@@ -44,7 +44,7 @@ public class AttributeDecompiler {
         File languagesFile = new File("languages");
         File jsonFile = new File(languagesFile, "English_Global.json");
 
-        FileReader fileReader = new FileReader(jsonFile);
+        InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(jsonFile.toPath()), StandardCharsets.UTF_8);
         BufferedReader reader = new BufferedReader(fileReader);
         String line;
         parsedFile.createNewFile();
@@ -151,7 +151,7 @@ public class AttributeDecompiler {
     }
 
     private static String[] findValues(String file, String from, boolean parentSearch, Fields fields, String... parentNames) throws IOException {
-        FileReader fileReader = new FileReader("attributes\\main\\attributes\\db\\" + file+".yml");
+        InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(new File("attributes\\main\\attributes\\db\\" + file+".yml").toPath()), StandardCharsets.UTF_8);
         BufferedReader reader = new BufferedReader(fileReader);
         String line;
         boolean startReading = false;

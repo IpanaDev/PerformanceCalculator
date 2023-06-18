@@ -39,7 +39,7 @@ public class ConfigFile {
 
     public static void load() throws IOException {
         if (CONFIG_FILE.exists()) {
-            FileReader fileReader = new FileReader(CONFIG_FILE);
+            InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(CONFIG_FILE.toPath()), StandardCharsets.UTF_8);
             BufferedReader reader = new BufferedReader(fileReader);
             String line;
             while ((line = reader.readLine()) != null) {
