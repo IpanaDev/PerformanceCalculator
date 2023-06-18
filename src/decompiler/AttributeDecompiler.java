@@ -63,15 +63,14 @@ public class AttributeDecompiler {
                 String[] pValues = findValues("pvehicle", vltName, false, P_FIELD, P_NAMES);
                 if (pValues != null) {
                     Fields E_FIELD = new Fields(
-                            new Field(int.class, FilterType.COLON, "RED_LINE"),
-                            new Field(int.class, FilterType.COLON, "MAX_RPM"));
+                            new Field(int.class, FilterType.COLON, "RED_LINE"));
                     Fields TIRE_FIELD = new Fields(
                             new Field(int.class, FilterType.COLON_ARRAY, "ASPECT_RATIO", 2),
                             new Field(int.class, FilterType.COLON_ARRAY, "SECTION_WIDTH", 2),
                             new Field(int.class, FilterType.COLON_ARRAY, "RIM_SIZE", 2));
                     Fields TRANS_FIELD = new Fields(
                             new Field(double.class, FilterType.HYPHEN, "GEAR_RATIO", 9,2, true),
-                            new Field(double.class, FilterType.HYPHEN, "DIFFERENTIAL", 3,2),
+                            new Field(double.class, FilterType.COLON, "TORQUE_SPLIT"),
                             new Field(double.class, FilterType.COLON, "FINAL_GEAR"));
                     String[] engineValues = findValues("engine", vltName, false, E_FIELD, E_NAMES);
                     String[] tireValues = findValues("tires", vltName, false, TIRE_FIELD, T_NAMES);
@@ -83,31 +82,23 @@ public class AttributeDecompiler {
                     for (String values : engineValues) {
                         builder.append(values).append(",");
                     }
+                    Fields SUB_ENGINE_FIELD = new Fields(
+                            new Field(int.class, FilterType.COLON, "RED_LINE", 0, 0, true));
+                    builder.append(findSubValues(vltName, "engine",SUB_ENGINE_FIELD, E_NAMES));
                     for (String values : tireValues) {
                         builder.append(values).append(",");
                     }
+                    Fields SUB_TIRE_FIELD = new Fields(
+                            new Field(int.class, FilterType.COLON_ARRAY, "ASPECT_RATIO", 2),
+                            new Field(int.class, FilterType.COLON_ARRAY, "SECTION_WIDTH", 2),
+                            new Field(int.class, FilterType.COLON_ARRAY, "RIM_SIZE", 2));
+                    builder.append(findSubValues(vltName,"tires",SUB_TIRE_FIELD,T_NAMES));
                     for (String values : transValues) {
                         builder.append(values).append(",");
                     }
-                    Fields SUB_TRANS_VLT = new Fields(
-                            new Field(String.class, FilterType.COLON, "Name"));
-                    String[] transVLT = findValues("transmission", vltName, false, SUB_TRANS_VLT, E_NAMES);
-                    String subTransVLT = transVLT[0];
-                    String[] subTrans = new String[]{"_t","_a","_h"};
-                    for (String s : subTrans) {
-                        Fields SUB_TRANS_FIELD = new Fields(
-                                new Field(double.class, FilterType.COLON, "FINAL_GEAR", 0, 0, true));
-                        String[] subTransValues = findValues("transmission", subTransVLT+s, false, SUB_TRANS_FIELD, subTransVLT);
-                        if (subTransValues == null) {
-                            subTransValues = findValues("transmission", Hasher.HashVLT_MEMORY_STRING(subTransVLT+s), false, SUB_TRANS_FIELD, subTransVLT);
-                        }
-                        if (subTransValues != null) {
-                            builder.append(subTransValues[0]).append(",");
-                        } else {
-                            builder.append("0,");
-                            System.out.println("sub trans still null for "+vltName+s+", "+Hasher.HashVLT_MEMORY_STRING(subTransVLT+s));
-                        }
-                    }
+                    Fields SUB_TRANS_FIELD = new Fields(
+                            new Field(double.class, FilterType.COLON, "FINAL_GEAR", 0, 0, true));
+                    builder.append(findSubValues(vltName, "transmission", SUB_TRANS_FIELD, E_NAMES));
                     builder.delete(builder.length()-1, builder.length());
                     builder.append("\n");
                     //System.out.println(builder);
@@ -121,6 +112,33 @@ public class AttributeDecompiler {
         fileReader.close();
         deleteFile(languagesFile);
         deleteFile(attributeFiles);
+    }
+
+    private static String findSubValues(String vltName, String file, Fields fields, String... parentNames) throws IOException {
+        Fields SUB_FILE_VLT = new Fields(
+                new Field(String.class, FilterType.COLON, "Name"));
+        String[] fileVLT = findValues(file, vltName, false, SUB_FILE_VLT, parentNames);
+        //fuck wuggie
+        String subFileVLT = fileVLT[0].replace("_rocket","");
+        String[] subFile = new String[]{"_t","_a","_h"};
+        StringBuilder builder = new StringBuilder();
+        for (String s : subFile) {
+            String[] subFileValues = findValues(file, subFileVLT+s, false, fields, subFileVLT);
+            if (subFileValues == null) {
+                subFileValues = findValues(file, Hasher.HashVLT_MEMORY_STRING(subFileVLT+s), false, fields, subFileVLT);
+            }
+            if (subFileValues != null) {
+                for (String sub : subFileValues) {
+                    builder.append(sub).append(",");
+                }
+            } else {
+                for (int i = 0; i < fields.valueSize; i++) {
+                    builder.append("0,");
+                }
+                System.out.println("sub" + file + "still null for "+vltName+s+", "+Hasher.HashVLT_MEMORY_STRING(subFileVLT+s));
+            }
+        }
+        return builder.toString();
     }
 
     private static void deleteFile(File file) throws IOException {
@@ -182,7 +200,6 @@ public class AttributeDecompiler {
                                         String[] newSplit = newLine.split("-");
                                         if (newSplit.length == 2) {
                                             String value = newSplit[1].substring(1);
-                                            //System.out.println("setting hyphen value: "+value+", "+field.fieldName+", "+from+", "+file+", ("+newLine+")");
                                             field.setValue(i, value);
                                         }
                                     }
@@ -208,9 +225,9 @@ public class AttributeDecompiler {
         String[] s = findValues("pvehicle", from, false, new Fields(new Field(String.class, FilterType.COLON_ARRAY, file, 1, 3)), P_NAMES);
         String parentVLT;
         if (s != null && (parentVLT = s[0]) != null) {
-            String[] engines = findValues(file, parentVLT, true, fields, parentNames);
-            if (engines != null) {
-                return engines;
+            String[] vlt = findValues(file, parentVLT, true, fields, parentNames);
+            if (vlt != null) {
+                return vlt;
             } else {
                 //System.out.printf("Parent %s null for %s, %s\n", file, from, parentVLT);
                 return null;

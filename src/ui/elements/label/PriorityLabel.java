@@ -47,6 +47,9 @@ public class PriorityLabel {
     }
 
     public void updateChildLabels(PerformanceMenu menu) {
+        for (JLabel label : this.childLabels) {
+            label.setText("");
+        }
         String[] split = menu.selectedPriority.fullName().split("-");
         for (int i = 0; i < split.length; i++) {
             this.childLabels[i].setText(split[i]);

@@ -9,17 +9,18 @@ public class Result {
     private SuspensionParts suspension = SuspensionParts.EMPTY;
     private BrakeParts brakes = BrakeParts.EMPTY;
     private TireParts tires = TireParts.EMPTY;
-    private double topSpeed, acceleration, handling;
+    private double topSpeed, acceleration, handling, realTopSpeed;
     private int rating;
     private long time;
 
-    public void set(EngineParts engine, TurboParts turbo, TransmissionParts trans, SuspensionParts suspension, BrakeParts brakes, TireParts tires, double topSpeed, double acceleration, double handling, int rating) {
+    public void set(EngineParts engine, TurboParts turbo, TransmissionParts trans, SuspensionParts suspension, BrakeParts brakes, TireParts tires, double realTopSpeed, double topSpeed, double acceleration, double handling, int rating) {
         this.engine = engine;
         this.turbo = turbo;
         this.trans = trans;
         this.suspension = suspension;
         this.brakes = brakes;
         this.tires = tires;
+        this.realTopSpeed = realTopSpeed;
         this.topSpeed = topSpeed;
         this.acceleration = acceleration;
         this.handling = handling;
@@ -85,6 +86,10 @@ public class Result {
 
     public double handling() {
         return handling;
+    }
+
+    public double realTopSpeed() {
+        return realTopSpeed;
     }
 
     public int rating() {

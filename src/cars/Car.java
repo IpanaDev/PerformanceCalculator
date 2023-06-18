@@ -4,14 +4,15 @@ public class Car {
     private int[] topSpeed, accel, handling;
     private double[] cTopSpeed, cAccel, cHandling;
     private String vltName, fullName;
-    private int RPM;
-    private int[] wheelRatio, wheelWidth, wheelSize;
-    private double[] gearRatios, differential;
+    private int[] RPM;
+    private int[][] wheelRatio, wheelWidth, wheelSize;
+    private double[] gearRatios;
     private double[] finalDrive;
-    private DrivetrainType drivetrainType;
-    private double[] stockTopSpeeds;
+    public double[] RIM_SIZE, SECTION_WIDTH, ASPECT_RATIO, cFINAL_DRIVE, cRPM;
+    public double MAX_GEAR_RATIO;
+    private double torqueSplit;
 
-    public Car(String vltName, String fullName, int[] topSpeed, int[] accel, int[] handling, int RPM, int[] wheelRatio, int[] wheelWidth, int[] wheelSize, double[] gearRatios, double[] differential, double[] finalDrive) {
+    public Car(String vltName, String fullName, int[] topSpeed, int[] accel, int[] handling, int[] RPM, int[][] wheelRatio, int[][] wheelWidth, int[][] wheelSize, double[] gearRatios, double torqueSplit, double[] finalDrive) {
         this.vltName = vltName;
         this.fullName = fullName;
         this.topSpeed = topSpeed;
@@ -22,7 +23,7 @@ public class Car {
         this.wheelWidth = wheelWidth;
         this.wheelSize = wheelSize;
         this.gearRatios = gearRatios;
-        this.differential = differential;
+        this.torqueSplit = torqueSplit;
         this.finalDrive = finalDrive;
         cTopSpeed = new double[topSpeed.length];
         cAccel = new double[accel.length];
@@ -40,24 +41,37 @@ public class Car {
         cTopSpeed[cTopSpeed.length-1] = topSpeed[0]*150;
         cAccel[cAccel.length-1] = accel[0]*150;
         cHandling[cHandling.length-1] = handling[0]*150;
-        if ((differential[0] > 0 && differential[1] > 0 && differential[2] > 0) || (differential[0] == 0 && differential[1] == 0 && differential[2] == 0)) {
-            setDrivetrain(DrivetrainType.ALL_WHEEL);
+        RIM_SIZE = new double[4];
+        SECTION_WIDTH = new double[4];
+        ASPECT_RATIO = new double[4];
+        cFINAL_DRIVE = new double[4];
+        cRPM = new double[4];
+        int tireIndex = torqueSplit > 0 ? 0 : 1;
+        for (int i = 0; i < RIM_SIZE.length; i++) {
+            RIM_SIZE[i] = 1.5*wheelSize[i][tireIndex] - 0.5*wheelSize[0][tireIndex];
         }
-        if (differential[2] == 0) {
-            if (differential[0] == 0 && differential[1] > 0) {
-                setDrivetrain(DrivetrainType.REAR_WHEEL);
-            } else if (differential[0] > 0 && differential[1] == 0) {
-                setDrivetrain(DrivetrainType.FRONT_WHEEL);
-            }
-            if (differential[0] > 0 && differential[1] > 0) {
-                setDrivetrain(DrivetrainType.FOUR_WHEEL);
-            }
+        for (int i = 0; i < SECTION_WIDTH.length; i++) {
+            SECTION_WIDTH[i] = 1.5*wheelWidth[i][tireIndex] - 0.5*wheelWidth[0][tireIndex];
         }
-        this.stockTopSpeeds = new double[7];
-    }
-
-    public double[] stockTopSpeeds() {
-        return stockTopSpeeds;
+        for (int i = 0; i < ASPECT_RATIO.length; i++) {
+            ASPECT_RATIO[i] = 1.5*wheelRatio[i][tireIndex] - 0.5*wheelRatio[0][tireIndex];
+        }
+        for (int i = 0; i < cFINAL_DRIVE.length-1; i++) {
+            cFINAL_DRIVE[i] = 1.5*finalDrive[i+1] - 0.5*finalDrive[0];
+        }
+        for (int i = 0; i < cRPM.length-1; i++) {
+            cRPM[i] = 1.5*RPM[i+1] - 0.5*RPM[0];
+        }
+        RIM_SIZE[3] = wheelSize[0][tireIndex]*150;
+        SECTION_WIDTH[3] = wheelWidth[0][tireIndex]*150;
+        ASPECT_RATIO[3] = wheelRatio[0][tireIndex]*150;
+        cFINAL_DRIVE[3] = finalDrive[0]*150;
+        cRPM[3] = RPM[0]*150;
+        int i = gearRatios.length-1;
+        while (gearRatios[i] == 0) {
+            i--;
+        }
+        MAX_GEAR_RATIO = gearRatios[i];
     }
 
     public String vltName() {
@@ -97,11 +111,11 @@ public class Car {
         return cHandling;
     }
 
-    public int RPM() {
+    public int[] RPM() {
         return RPM;
     }
 
-    public int[] wheelRatio() {
+    public int[][] wheelRatio() {
         return wheelRatio;
     }
 
@@ -113,23 +127,15 @@ public class Car {
         return finalDrive;
     }
 
-    public int[] wheelWidth() {
+    public int[][] wheelWidth() {
         return wheelWidth;
     }
 
-    public double[] differential() {
-        return differential;
+    public double torqueSplit() {
+        return torqueSplit;
     }
 
-    public int[] wheelSize() {
+    public int[][] wheelSize() {
         return wheelSize;
-    }
-
-    public DrivetrainType drivetrain() {
-        return drivetrainType;
-    }
-
-    public void setDrivetrain(DrivetrainType _drivetrainType) {
-        drivetrainType = _drivetrainType;
     }
 }

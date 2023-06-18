@@ -40,7 +40,7 @@ public class PerfCalculator {
         double finalClass = ((int) tStat + (int) aStat + (int) hStat) / 3d;
         int finalClassInt = (int) finalClass;
         final Result result = new Result();
-        result.set(engine, turbo, trans, suspension, brakes, tires, tStat, aStat, hStat, finalClassInt);
+        result.set(engine, turbo, trans, suspension, brakes, tires,0, tStat, aStat, hStat, finalClassInt);
         System.out.println("Search took (" + (System.currentTimeMillis() - ms) + "ms)");
         System.out.println(result);
         return result;
@@ -112,7 +112,8 @@ public class PerfCalculator {
                                 double finalClass = ((int)finalTopSpeed + (int)finalAccel + (int)finalHandling) / 3d;
                                 int finalClassInt = (int) finalClass;
                                 if (finalClassInt >= overall.min() && finalClassInt <= overall.max()) {
-                                    priority.handle(result, finalTopSpeed, finalAccel, finalHandling, finalClassInt, engine, turbo, trans, suspension, brakes, tires);
+                                    double real = priority == Priority.R ? calcRealTopSpeed(car, engine, turbo, trans, suspension, brakes, tires) : 0;
+                                    priority.handle(result, real, finalTopSpeed, finalAccel, finalHandling, finalClassInt, engine, turbo, trans, suspension, brakes, tires);
                                 }
                             }
                         }
@@ -122,5 +123,23 @@ public class PerfCalculator {
         }
         result.setTime(System.currentTimeMillis() - ms);
         return result;
+    }
+
+    private static double calcRealTopSpeed(Car car, EngineParts engine, TurboParts turbo, TransmissionParts trans, SuspensionParts suspension, BrakeParts brakes, TireParts tires) {
+        int tGain = Math.abs(engine.tGain() + turbo.tGain() + trans.tGain() + suspension.tGain() + brakes.tGain() + tires.tGain());
+        int aGain = Math.abs(engine.aGain() + turbo.aGain() + trans.aGain() + suspension.aGain() + brakes.aGain() + tires.aGain());
+        int hGain = Math.abs(engine.hGain() + turbo.hGain() + trans.hGain() + suspension.hGain() + brakes.hGain() + tires.hGain());
+        //int tGain = Math.abs(engine.tGain()) + Math.abs(turbo.tGain()) + Math.abs(trans.tGain()) + Math.abs(suspension.tGain()) + Math.abs(brakes.tGain()) + Math.abs(tires.tGain());
+        //int aGain = Math.abs(engine.aGain()) + Math.abs(turbo.aGain()) + Math.abs(trans.aGain()) + Math.abs(suspension.aGain()) + Math.abs(brakes.aGain()) + Math.abs(tires.aGain());
+        //int hGain = Math.abs(engine.hGain()) + Math.abs(turbo.hGain()) + Math.abs(trans.hGain()) + Math.abs(suspension.hGain()) + Math.abs(brakes.hGain()) + Math.abs(tires.hGain());
+        double commonDivisor = 150 + tGain + aGain + hGain;
+        double FINAL_DRIVE = (tGain*car.cFINAL_DRIVE[0] + aGain*car.cFINAL_DRIVE[1] + hGain*car.cFINAL_DRIVE[2] + car.cFINAL_DRIVE[3]) / commonDivisor;
+        double RPM = (tGain*car.cRPM[0] + aGain*car.cRPM[1] + hGain*car.cRPM[2] + car.cRPM[3]) / commonDivisor;
+        double RIM_SIZE = (tGain*car.RIM_SIZE[0] + aGain*car.RIM_SIZE[1] + hGain*car.RIM_SIZE[2] + car.RIM_SIZE[3]) / commonDivisor;
+        double SECTION_WIDTH = (tGain*car.SECTION_WIDTH[0] + aGain*car.SECTION_WIDTH[1] + hGain*car.SECTION_WIDTH[2] + car.SECTION_WIDTH[3]) / commonDivisor;
+        double ASPECT_RATIO = (tGain*car.ASPECT_RATIO[0] + aGain*car.ASPECT_RATIO[1] + hGain*car.ASPECT_RATIO[2] + car.ASPECT_RATIO[3]) / commonDivisor;
+        double TyreCircumference = Math.PI * (RIM_SIZE * 25.4 + ((SECTION_WIDTH * ASPECT_RATIO) / 100.0) * 2);
+        double speedKMH = (((RPM / car.MAX_GEAR_RATIO / FINAL_DRIVE) * TyreCircumference) / 1000000) * 60;
+        return speedKMH;
     }
 }
