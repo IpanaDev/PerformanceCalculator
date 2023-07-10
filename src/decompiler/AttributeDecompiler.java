@@ -15,31 +15,9 @@ public class AttributeDecompiler {
     public static final String[] T_NAMES = {"tuner","exotic","muscle"};
     public static final String[] E_NAMES = {"default"};
 
-    public static void start(File parsedFile) throws IOException, InterruptedException {
-        UI.INSTANCE.decompilerMenu().setStatus("Unpacking ATTRIBUTE files...");
+    public static void start(File partsFile, File parsedFile) throws IOException, InterruptedException {
         File attributeFiles = new File("attributes");
-        if (!attributeFiles.exists()) {
-            String gamePath = String.valueOf(ConfigFile.valueFromName("Game Location"));
-            File globalFile = new File(gamePath + "\\.data\\b2d5f170c62d6e37ac67c04be2235249\\GLOBAL");
-            File gcVaults = new File(gamePath + "\\GLOBAL\\gc.vaults");
-            File newGcVaults = new File(globalFile, "gc.vaults");
-            if (!newGcVaults.exists()) {
-                gcVaults.mkdir();
-            }
-            Files.copy(gcVaults.toPath(), newGcVaults.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            for (File vaults : gcVaults.listFiles()) {
-                File newVaults = new File(newGcVaults, vaults.getName());
-                Files.copy(vaults.toPath(), newVaults.toPath());
-            }
-            String s = String.valueOf('"');
-            String in = s + gamePath + "\\.data\\b2d5f170c62d6e37ac67c04be2235249\\GLOBAL" + s;
-            String out = s + "attributes" + s;
-            String attribulator = s + "decompiler tools\\attribulator\\Attribulator.CLI.exe" + s;
-            long ms = System.currentTimeMillis();
-            new ProcessBuilder().command(attribulator, "unpack", "-i", in, "-o", out, "-p", "WORLD", "-f", "yml").start().waitFor();
-            System.out.println("Took " + (System.currentTimeMillis() - ms) + "ms to unpack attributes");
-            deleteFile(newGcVaults);
-        }
+        unpackAttributes(attributeFiles);
         UI.INSTANCE.decompilerMenu().setStatus("Parsing ATTRIBUTE files...");
         File languagesFile = new File("languages");
         File jsonFile = new File(languagesFile, "English_Global.json");
@@ -56,6 +34,7 @@ public class AttributeDecompiler {
             if (line.startsWith("  \"GM_CAR_")) {
                 String vltName = split[0].substring(10, split[0].length() - 1).toLowerCase(Locale.ENGLISH);
                 String fullName = split[1].substring(2, split[1].length() - 2);
+                UI.INSTANCE.decompilerMenu().setStatus("Parsing ATTRIBUTE files (cars/"+fullName+")");
                 Fields P_FIELD = new Fields(
                         new Field(int.class, FilterType.HYPHEN,"TopSpeed",4,2),
                         new Field(int.class, FilterType.HYPHEN,"Acceleration",4,2),
@@ -110,8 +89,36 @@ public class AttributeDecompiler {
         writer.close();
         reader.close();
         fileReader.close();
+        if (partsFile.exists()) {
+            deleteFile(attributeFiles);
+        }
         deleteFile(languagesFile);
-        deleteFile(attributeFiles);
+    }
+
+    public static void unpackAttributes(File attributeFiles) throws IOException, InterruptedException {
+        if (!attributeFiles.exists()) {
+            UI.INSTANCE.decompilerMenu().setStatus("Unpacking ATTRIBUTE files...");
+            String gamePath = String.valueOf(ConfigFile.valueFromName("Game Location"));
+            File globalFile = new File(gamePath + "\\.data\\b2d5f170c62d6e37ac67c04be2235249\\GLOBAL");
+            File gcVaults = new File(gamePath + "\\GLOBAL\\gc.vaults");
+            File newGcVaults = new File(globalFile, "gc.vaults");
+            if (!newGcVaults.exists()) {
+                gcVaults.mkdir();
+            }
+            Files.copy(gcVaults.toPath(), newGcVaults.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            for (File vaults : gcVaults.listFiles()) {
+                File newVaults = new File(newGcVaults, vaults.getName());
+                Files.copy(vaults.toPath(), newVaults.toPath());
+            }
+            String s = String.valueOf('"');
+            String in = s + gamePath + "\\.data\\b2d5f170c62d6e37ac67c04be2235249\\GLOBAL" + s;
+            String out = s + "attributes" + s;
+            String attribulator = s + "decompiler tools\\attribulator\\Attribulator.CLI.exe" + s;
+            long ms = System.currentTimeMillis();
+            new ProcessBuilder().command(attribulator, "unpack", "-i", in, "-o", out, "-p", "WORLD", "-f", "yml").start().waitFor();
+            System.out.println("Took " + (System.currentTimeMillis() - ms) + "ms to unpack attributes");
+            deleteFile(newGcVaults);
+        }
     }
 
     private static String findSubValues(String vltName, String file, Fields fields, String... parentNames) throws IOException {

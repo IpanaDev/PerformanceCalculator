@@ -47,7 +47,7 @@ public enum Priority {
         this.consumer = result;
     }
 
-    public void handle(Result result, double realTopSpeed, double finalTopSpeed, double finalAccel, double finalHandling, int finalClassInt, EngineParts engine, TurboParts turbo, TransmissionParts trans, SuspensionParts suspension, BrakeParts brakes, TireParts tires) {
+    public void handle(Result result, double realTopSpeed, double finalTopSpeed, double finalAccel, double finalHandling, int finalClassInt, PerfPart engine, PerfPart turbo, PerfPart trans, PerfPart suspension, PerfPart brakes, PerfPart tires) {
         if (this.consumer.accept(result, realTopSpeed, finalTopSpeed, finalAccel, finalHandling)) {
             result.set(engine, turbo, trans, suspension, brakes, tires, realTopSpeed, finalTopSpeed, finalAccel, finalHandling, finalClassInt);
         }

@@ -15,8 +15,9 @@ public class DecompilerMenu extends Menu {
     @Override
     public void init() throws IllegalAccessException {
         gui().getContentPane().removeAll();
-        label = gui().createLabel("", 365, 200, 250, 55);
-        label.setHorizontalTextPosition(SwingConstants.CENTER);
+        label = gui().createLabel("", 0, 200, 930, 55);
+        label.setHorizontalTextPosition(JLabel.CENTER);
+        label.setHorizontalAlignment(JLabel.CENTER);
         gui().getContentPane().repaint();
     }
 

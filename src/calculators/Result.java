@@ -2,18 +2,21 @@ package calculators;
 
 import performance.*;
 
+import javax.swing.text.NumberFormatter;
+import java.text.ParseException;
+
 public class Result {
-    private EngineParts engine = EngineParts.EMPTY;
-    private TurboParts turbo = TurboParts.EMPTY;
-    private TransmissionParts trans = TransmissionParts.EMPTY;
-    private SuspensionParts suspension = SuspensionParts.EMPTY;
-    private BrakeParts brakes = BrakeParts.EMPTY;
-    private TireParts tires = TireParts.EMPTY;
+    private PerfPart engine = PerfPart.EMPTY_ENGINE;
+    private PerfPart turbo = PerfPart.EMPTY_TURBO;
+    private PerfPart trans = PerfPart.EMPTY_TRANSMISSION;
+    private PerfPart suspension = PerfPart.EMPTY_SUSPENSION;
+    private PerfPart brakes = PerfPart.EMPTY_BRAKES;
+    private PerfPart tires = PerfPart.EMPTY_TIRES;
     private double topSpeed, acceleration, handling, realTopSpeed;
     private int rating;
     private long time;
 
-    public void set(EngineParts engine, TurboParts turbo, TransmissionParts trans, SuspensionParts suspension, BrakeParts brakes, TireParts tires, double realTopSpeed, double topSpeed, double acceleration, double handling, int rating) {
+    public void set(PerfPart engine, PerfPart turbo, PerfPart trans, PerfPart suspension, PerfPart brakes, PerfPart tires, double realTopSpeed, double topSpeed, double acceleration, double handling, int rating) {
         this.engine = engine;
         this.turbo = turbo;
         this.trans = trans;
@@ -29,7 +32,7 @@ public class Result {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("calculators.Result{");
+        final StringBuilder sb = new StringBuilder("calculators.Result{");
         sb.append("engine=").append(engine);
         sb.append(", turbo=").append(turbo);
         sb.append(", trans=").append(trans);
@@ -52,27 +55,27 @@ public class Result {
         return time;
     }
 
-    public EngineParts engine() {
+    public PerfPart engine() {
         return engine;
     }
 
-    public TurboParts turbo() {
+    public PerfPart turbo() {
         return turbo;
     }
 
-    public TransmissionParts trans() {
+    public PerfPart trans() {
         return trans;
     }
 
-    public SuspensionParts suspension() {
+    public PerfPart suspension() {
         return suspension;
     }
 
-    public BrakeParts brakes() {
+    public PerfPart brakes() {
         return brakes;
     }
 
-    public TireParts tires() {
+    public PerfPart tires() {
         return tires;
     }
 
@@ -94,5 +97,12 @@ public class Result {
 
     public int rating() {
         return rating;
+    }
+
+    public int cost() {
+        return engine.price() + turbo.price() + trans.price() + suspension.price() + brakes.price() + tires.price();
+    }
+    public String costString() throws ParseException {
+        return new NumberFormatter().valueToString(cost()) + " IGC";
     }
 }

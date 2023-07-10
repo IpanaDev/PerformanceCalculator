@@ -7,11 +7,6 @@ public class PreChecks {
     private double tValue0, tValue1, tValue2, tValue3;
     private double aValue0, aValue1, aValue2, aValue3;
     private double hValue0, hValue1, hValue2, hValue3;
-    private PrevSum sumEngine = new PrevSum();
-    private PrevSum sumTurbo = new PrevSum();
-    private PrevSum sumTrans = new PrevSum();
-    private PrevSum sumSusp = new PrevSum();
-    public PrevSum sumBrake = new PrevSum();
     private Overall overall;
 
     public PreChecks(Overall overall, double tValue0, double tValue1, double tValue2, double tValue3, double aValue0, double aValue1, double aValue2, double aValue3, double hValue0, double hValue1, double hValue2, double hValue3) {
@@ -30,41 +25,18 @@ public class PreChecks {
         this.hValue3 = hValue3;
     }
 
-    public boolean check(EngineParts part) {
-        int topSpeed = part.tGain();
-        int accel = part.aGain();
-        int handling = part.hGain();
-        sumEngine.set(topSpeed, accel, handling);
+    public boolean check(PerfPart... parts) {
+        int topSpeed = 0;
+        int accel = 0;
+        int handling = 0;
+        for (PerfPart part : parts) {
+            topSpeed += part.tGain();
+            accel += part.aGain();
+            handling += part.hGain();
+        }
         return check(topSpeed, accel, handling);
     }
-    public boolean check(TurboParts part) {
-        int topSpeed = sumEngine.topSpeed + part.tGain();
-        int accel = sumEngine.accel + part.aGain();
-        int handling = sumEngine.handling + part.hGain();
-        sumTurbo.set(topSpeed, accel, handling);
-        return check(topSpeed, accel, handling);
-    }
-    public boolean check(TransmissionParts part) {
-        int topSpeed = sumTurbo.topSpeed + part.tGain();
-        int accel = sumTurbo.accel + part.aGain();
-        int handling = sumTurbo.handling + part.hGain();
-        sumTrans.set(topSpeed, accel, handling);
-        return check(topSpeed, accel, handling);
-    }
-    public boolean check(SuspensionParts part) {
-        int topSpeed = sumTrans.topSpeed + part.tGain();
-        int accel = sumTrans.accel + part.aGain();
-        int handling = sumTrans.handling + part.hGain();
-        sumSusp.set(topSpeed, accel, handling);
-        return check(topSpeed, accel, handling);
-    }
-    public boolean check(BrakeParts part) {
-        int topSpeed = sumSusp.topSpeed + part.tGain();
-        int accel = sumSusp.accel + part.aGain();
-        int handling = sumSusp.handling + part.hGain();
-        sumBrake.set(topSpeed, accel, handling);
-        return check(topSpeed, accel, handling);
-    }
+
     private boolean check(int topSpeed, int accel, int handling) {
         int i = calc(topSpeed, accel, handling);
         return i > overall.max();
@@ -77,15 +49,5 @@ public class PreChecks {
         double finalHandling = (topSpeed*hValue0 + accel*hValue1 + handling*hValue2 + hValue3) / commonDivisor;
         double finalClass = ((int) finalTopSpeed + (int) finalAccel + (int) finalHandling) / 3d;
         return (int) finalClass;
-    }
-    
-    class PrevSum {
-        int topSpeed, accel, handling;
-        
-        void set(int t, int a, int h) {
-            this.topSpeed = t;
-            this.accel = a;
-            this.handling = h;
-        }
     }
 }

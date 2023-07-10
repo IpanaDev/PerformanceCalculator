@@ -6,6 +6,7 @@ import calculators.priority.Priority;
 import cars.Car;
 import cars.Cars;
 import cars.Overall;
+import performance.PerfPart;
 import performance.ValueFilter;
 import ui.UI;
 import ui.elements.label.PriorityLabel;
@@ -16,6 +17,7 @@ import ui.menu.Menu;
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.text.ParseException;
 import java.util.Locale;
 
 public class PerformanceMenu extends Menu {
@@ -57,29 +59,30 @@ public class PerformanceMenu extends Menu {
                 } else {
                     result = PerfCalculator.find(
                             (Car) selectedCar.getModel().getSelectedItem(),
-                            new Object[]{
-                                    resultLabel.engineParts.getModel().getSelectedItem(),
-                                    resultLabel.turboParts.getModel().getSelectedItem(),
-                                    resultLabel.transmissionParts.getModel().getSelectedItem(),
-                                    resultLabel.suspensionParts.getModel().getSelectedItem(),
-                                    resultLabel.brakeParts.getModel().getSelectedItem(),
-                                    resultLabel.tireParts.getModel().getSelectedItem()});
+                            new PerfPart[]{
+                                    (PerfPart) resultLabel.engineParts.getModel().getSelectedItem(),
+                                    (PerfPart) resultLabel.turboParts.getModel().getSelectedItem(),
+                                    (PerfPart) resultLabel.transmissionParts.getModel().getSelectedItem(),
+                                    (PerfPart) resultLabel.suspensionParts.getModel().getSelectedItem(),
+                                    (PerfPart) resultLabel.brakeParts.getModel().getSelectedItem(),
+                                    (PerfPart) resultLabel.tireParts.getModel().getSelectedItem()});
                 }
-                resultLabel.setLabelText(0, ValueFilter.formattedName(result.engine()));
-                resultLabel.setLabelText(1, ValueFilter.formattedName(result.turbo()));
-                resultLabel.setLabelText(2, ValueFilter.formattedName(result.trans()));
-                resultLabel.setLabelText(3, ValueFilter.formattedName(result.suspension()));
-                resultLabel.setLabelText(4, ValueFilter.formattedName(result.brakes()));
-                resultLabel.setLabelText(5, ValueFilter.formattedName(result.tires()));
+                resultLabel.setLabelText(0, result.engine().name());
+                resultLabel.setLabelText(1, result.turbo().name());
+                resultLabel.setLabelText(2, result.trans().name());
+                resultLabel.setLabelText(3, result.suspension().name());
+                resultLabel.setLabelText(4, result.brakes().name());
+                resultLabel.setLabelText(5, result.tires().name());
                 resultLabel.setLabelText(6, String.valueOf(result.rating()));
                 resultLabel.setLabelText(7, String.valueOf(result.topSpeed()));
                 resultLabel.setLabelText(8, String.valueOf(result.acceleration()));
                 resultLabel.setLabelText(9, String.valueOf(result.handling()));
-                resultLabel.setLabelText(10, "Took "+result.time() +"ms");
+                resultLabel.setLabelText(10, result.costString());
+                resultLabel.setLabelText(11, "Took "+result.time() +"ms");
                 topSpeedLabel.calcAndSet(result, (Car) selectedCar.getModel().getSelectedItem());
                 find.setText("Find");
                 gui().getContentPane().repaint();
-            } catch (IllegalAccessException | NoSuchFieldException e) {
+            } catch (IllegalAccessException | NoSuchFieldException | ParseException e) {
                 throw new RuntimeException(e);
             }
         });
