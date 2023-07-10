@@ -9,17 +9,15 @@ import java.util.ArrayList;
 
 public class ConfigFile {
     public static final File CONFIG_FILE = new File("config.txt");
+    private static final ArrayList<ConfigField> CONFIG_FIELDS = new ArrayList<>();
     public static final ConfigField GAME_LOCATION = new ConfigField("Game Location","");
     public static final ConfigField USE_CACHE = new ConfigField("Use Cache",true);
-    private static final ArrayList<ConfigField> CONFIG_FIELDS = new ArrayList<>();
-
-    static {
-        CONFIG_FIELDS.add(GAME_LOCATION);
-        CONFIG_FIELDS.add(USE_CACHE);
-    }
+    public static final ConfigField COLOR = new ConfigField("UI Color","125,98,255");
+    public static final ConfigField BUTTON_COLOR = new ConfigField("Button Color","50,50,50");
 
     public static void init() throws IOException, IllegalAccessException, InterruptedException {
         load();
+        UI.onConfigLoad();
         if (!CONFIG_FILE.exists() || invalidGameFolder()) {
             save("C:\\", true);
             UI.INSTANCE.configMenu().init();
@@ -41,10 +39,20 @@ public class ConfigFile {
         if (CONFIG_FILE.exists()) {
             InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(CONFIG_FILE.toPath()), StandardCharsets.UTF_8);
             BufferedReader reader = new BufferedReader(fileReader);
+
             String line;
+            int lineCount = 0;
             while ((line = reader.readLine()) != null) {
                 String[] split = line.split("=");
                 fieldFromName(split[0]).value = split[1];
+                lineCount++;
+            }
+            if (lineCount < CONFIG_FIELDS.size()) {
+                Object[] values = new Object[CONFIG_FIELDS.size()];
+                for (int i = 0; i < CONFIG_FIELDS.size(); i++) {
+                    values[i] = CONFIG_FIELDS.get(i).value;
+                }
+                save(values);
             }
             reader.close();
             fileReader.close();
@@ -76,13 +84,18 @@ public class ConfigFile {
     }
 
 
-    static class ConfigField {
+    public static class ConfigField {
         String name;
         Object value;
 
         public ConfigField(String name, Object value) {
             this.name = name;
             this.value = value;
+            CONFIG_FIELDS.add(this);
+        }
+
+        public Object value() {
+            return value;
         }
     }
 }

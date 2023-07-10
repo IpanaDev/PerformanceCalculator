@@ -1,3 +1,5 @@
 # Project exclude paths
 /out/
 /decompiler tools/
+/parts/
+/.idea/

@@ -1,6 +1,7 @@
 package ui;
 
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import config.ConfigFile;
 import main.Main;
 import ui.menu.impl.ConfigMenu;
 import ui.menu.impl.DecompilerMenu;
@@ -12,13 +13,21 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 public class UI extends JFrame {
-    public static final Color MAIN_COLOR = new Color(125, 98, 255);
-    public static final Color BUTTON_COLOR = new Color(50, 50, 50);
-    public static final Border BUTTON_BORDER = BorderFactory.createLineBorder(MAIN_COLOR, 1, false);
+    public static Color MAIN_COLOR;
+    public static Color BUTTON_COLOR;
+    public static Border BUTTON_BORDER;
     private PerformanceMenu performanceMenu = new PerformanceMenu(this);
     private ConfigMenu configMenu = new ConfigMenu(this);
     private DecompilerMenu decompilerMenu = new DecompilerMenu(this);
     public static UI INSTANCE;
+
+    static {
+        String[] main = String.valueOf(ConfigFile.COLOR.value()).split(",");
+        String[] button = String.valueOf(ConfigFile.BUTTON_COLOR.value()).split(",");
+        MAIN_COLOR = new Color(Integer.parseInt(main[0]), Integer.parseInt(main[1]), Integer.parseInt(main[2]));
+        BUTTON_COLOR = new Color(Integer.parseInt(button[0]), Integer.parseInt(button[1]), Integer.parseInt(button[2]));
+        BUTTON_BORDER = BorderFactory.createLineBorder(MAIN_COLOR, 1, false);
+    }
 
     public UI() throws IllegalAccessException {
         System.setProperty("sun.java2d.d3d", "false");
@@ -38,6 +47,14 @@ public class UI extends JFrame {
     public static void init() throws IllegalAccessException {
         FlatMacDarkLaf.setup();
         INSTANCE = new UI();
+    }
+
+    public static void onConfigLoad() {
+        String[] main = String.valueOf(ConfigFile.COLOR.value()).split(",");
+        String[] button = String.valueOf(ConfigFile.BUTTON_COLOR.value()).split(",");
+        MAIN_COLOR = new Color(Integer.parseInt(main[0]), Integer.parseInt(main[1]), Integer.parseInt(main[2]));
+        BUTTON_COLOR = new Color(Integer.parseInt(button[0]), Integer.parseInt(button[1]), Integer.parseInt(button[2]));
+        BUTTON_BORDER = BorderFactory.createLineBorder(MAIN_COLOR, 1, false);
     }
 
     public PerformanceMenu performanceMenu() {

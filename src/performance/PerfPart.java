@@ -55,4 +55,9 @@ public class PerfPart {
     public Type type() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
