@@ -30,34 +30,36 @@ public class TopSpeedLabel {
         int tGain = result.engine().tGain() + result.turbo().tGain() + result.trans().tGain() + result.suspension().tGain() + result.brakes().tGain() + result.tires().tGain();
         int aGain = result.engine().aGain() + result.turbo().aGain() + result.trans().aGain() + result.suspension().aGain() + result.brakes().aGain() + result.tires().aGain();
         int hGain = result.engine().hGain() + result.turbo().hGain() + result.trans().hGain() + result.suspension().hGain() + result.brakes().hGain() + result.tires().hGain();
-        System.out.println("t: "+tGain+", a: "+aGain+", h: "+hGain);
+        System.out.println("t: " + tGain + ", a: " + aGain + ", h: " + hGain);
         if (tGain < 0) {
-            tGain *= -(aGain+hGain)/300;
+            tGain *= -(aGain + hGain) / 300;
         }
 
         if (aGain < 0) {
-            aGain *= -(tGain+hGain)/25;
+            aGain *= -(tGain + hGain) / 25;
         }
 
         if (hGain < 0) {
-            hGain *= -(tGain+aGain)/100;
+            hGain *= -(tGain + aGain) / 100;
         }
-        double commonDivisor = 150 + tGain + aGain + hGain;
-        double FINAL_DRIVE = (tGain*car.cFINAL_DRIVE[0] + aGain*car.cFINAL_DRIVE[1] + hGain*car.cFINAL_DRIVE[2] + car.cFINAL_DRIVE[3]) / commonDivisor;
-        double RPM = (tGain*car.cRPM[0] + aGain*car.cRPM[1] + hGain*car.cRPM[2] + car.cRPM[3]) / commonDivisor;
-        double RIM_SIZE = (tGain*car.RIM_SIZE[0] + aGain*car.RIM_SIZE[1] + hGain*car.RIM_SIZE[2] + car.RIM_SIZE[3]) / commonDivisor;
-        double SECTION_WIDTH = (tGain*car.SECTION_WIDTH[0] + aGain*car.SECTION_WIDTH[1] + hGain*car.SECTION_WIDTH[2] + car.SECTION_WIDTH[3]) / commonDivisor;
-        double ASPECT_RATIO = (tGain*car.ASPECT_RATIO[0] + aGain*car.ASPECT_RATIO[1] + hGain*car.ASPECT_RATIO[2] + car.ASPECT_RATIO[3]) / commonDivisor;
-        double TyreCircumference = Math.PI * (RIM_SIZE * 25.4 + ((SECTION_WIDTH * ASPECT_RATIO) / 100.0) * 2);
-
-        for (int i = 2; i < car.gearRatio().length; i++) {
-            double gearRatio = car.gearRatio()[i];
+        int commonDivisor = 150 + tGain + aGain + hGain;
+        double FINAL_DRIVE = partCalc(tGain, aGain, hGain, commonDivisor, car.FINAL_DRIVE);
+        double RPM = partCalc(tGain, aGain, hGain, commonDivisor, car.cRPM);
+        double RIM_SIZE = partCalc(tGain, aGain, hGain, commonDivisor, car.RIM_SIZE);
+        double SECTION_WIDTH = partCalc(tGain, aGain, hGain, commonDivisor, car.SECTION_WIDTH);
+        double ASPECT_RATIO = partCalc(tGain, aGain, hGain, commonDivisor, car.ASPECT_RATIO);
+        double TyreCircumference = Math.PI * (RIM_SIZE * 25.4 + ((SECTION_WIDTH * ASPECT_RATIO) / 50));
+        for (int i = 2; i < 9; i++) {
+            double gearRatio = car.gearRatio().length > 9 ? partCalc(tGain, aGain, hGain, commonDivisor, car.GEAR_RATIO[i]) : car.gearRatio()[i];
             if (gearRatio <= 0) {
-                jLabels[i-2].setText("");
+                jLabels[i - 2].setText("");
                 continue;
             }
-            double speedKMH = (((RPM / gearRatio / FINAL_DRIVE) * TyreCircumference) / 1000000) * 60;
-            setSpeed(jLabels[i-2], speedKMH);
+            double speedKMH = ((RPM / gearRatio / FINAL_DRIVE) * TyreCircumference) * 0.00006;
+            setSpeed(jLabels[i - 2], speedKMH);
         }
+    }
+    private double partCalc(int tGain, int aGain, int hGain, int commonDivisor, double[] array) {
+        return array.length == 1 ? array[0] : (tGain*array[0] + aGain*array[1] + hGain*array[2] + array[3]) / commonDivisor;
     }
 }

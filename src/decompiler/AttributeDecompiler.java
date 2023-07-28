@@ -1,91 +1,66 @@
 package decompiler;
 
 import config.ConfigFile;
+import decompiler.vlt.CarVLT;
+import decompiler.vlt.VltNode;
 import ui.UI;
-import utils.Hasher;
+import utils.Equality;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 
 public class AttributeDecompiler {
-    public static final String[] P_NAMES = {"tuner","exotic","muscle","addon_tuner","addon_exotic","addon_muscle"};
-    public static final String[] T_NAMES = {"tuner","exotic","muscle"};
-    public static final String[] E_NAMES = {"default"};
 
     public static void start(File partsFile, File parsedFile) throws IOException, InterruptedException {
         File attributeFiles = new File("attributes");
         unpackAttributes(attributeFiles);
-        UI.INSTANCE.decompilerMenu().setStatus("Parsing ATTRIBUTE files...");
         File languagesFile = new File("languages");
         File jsonFile = new File(languagesFile, "English_Global.json");
 
         InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(jsonFile.toPath()), StandardCharsets.UTF_8);
         BufferedReader reader = new BufferedReader(fileReader);
         String line;
-        parsedFile.createNewFile();
-        Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(parsedFile.toPath()), StandardCharsets.UTF_8));
         long ms = System.currentTimeMillis();
-        StringBuilder builder = new StringBuilder((int) Math.pow(2, 16));
+        ArrayList<CarVLT> carVLTS = new ArrayList<>();
         while ((line = reader.readLine()) != null) {
             String[] split = line.split(":");
             if (line.startsWith("  \"GM_CAR_")) {
                 String vltName = split[0].substring(10, split[0].length() - 1).toLowerCase(Locale.ENGLISH);
                 String fullName = split[1].substring(2, split[1].length() - 2);
-                UI.INSTANCE.decompilerMenu().setStatus("Parsing ATTRIBUTE files (cars/"+fullName+")");
-                Fields P_FIELD = new Fields(
-                        new Field(int.class, FilterType.HYPHEN,"TopSpeed",4,2),
-                        new Field(int.class, FilterType.HYPHEN,"Acceleration",4,2),
-                        new Field(int.class, FilterType.HYPHEN,"Handling",4,2));
-                String[] pValues = findValues("pvehicle", vltName, false, P_FIELD, P_NAMES);
-                if (pValues != null) {
-                    Fields E_FIELD = new Fields(
-                            new Field(int.class, FilterType.COLON, "RED_LINE"));
-                    Fields TIRE_FIELD = new Fields(
-                            new Field(int.class, FilterType.COLON_ARRAY, "ASPECT_RATIO", 2),
-                            new Field(int.class, FilterType.COLON_ARRAY, "SECTION_WIDTH", 2),
-                            new Field(int.class, FilterType.COLON_ARRAY, "RIM_SIZE", 2));
-                    Fields TRANS_FIELD = new Fields(
-                            new Field(double.class, FilterType.HYPHEN, "GEAR_RATIO", 9,2, true),
-                            new Field(double.class, FilterType.COLON, "TORQUE_SPLIT"),
-                            new Field(double.class, FilterType.COLON, "FINAL_GEAR"));
-                    String[] engineValues = findValues("engine", vltName, false, E_FIELD, E_NAMES);
-                    String[] tireValues = findValues("tires", vltName, false, TIRE_FIELD, T_NAMES);
-                    String[] transValues = findValues("transmission", vltName, false, TRANS_FIELD, E_NAMES);
-                    builder.append(vltName).append(",").append(fullName).append(",");
-                    for (String values : pValues) {
-                        builder.append(values).append(",");
-                    }
-                    for (String values : engineValues) {
-                        builder.append(values).append(",");
-                    }
-                    Fields SUB_ENGINE_FIELD = new Fields(
-                            new Field(int.class, FilterType.COLON, "RED_LINE", 0, 0, true));
-                    builder.append(findSubValues(vltName, "engine",SUB_ENGINE_FIELD, E_NAMES));
-                    for (String values : tireValues) {
-                        builder.append(values).append(",");
-                    }
-                    Fields SUB_TIRE_FIELD = new Fields(
-                            new Field(int.class, FilterType.COLON_ARRAY, "ASPECT_RATIO", 2),
-                            new Field(int.class, FilterType.COLON_ARRAY, "SECTION_WIDTH", 2),
-                            new Field(int.class, FilterType.COLON_ARRAY, "RIM_SIZE", 2));
-                    builder.append(findSubValues(vltName,"tires",SUB_TIRE_FIELD,T_NAMES));
-                    for (String values : transValues) {
-                        builder.append(values).append(",");
-                    }
-                    Fields SUB_TRANS_FIELD = new Fields(
-                            new Field(double.class, FilterType.COLON, "FINAL_GEAR", 0, 0, true));
-                    builder.append(findSubValues(vltName, "transmission", SUB_TRANS_FIELD, E_NAMES));
-                    builder.delete(builder.length()-1, builder.length());
-                    builder.append("\n");
-                    //System.out.println(builder);
+                //Thanks to lang files we have extra space in some car names
+                int i = fullName.length()-1;
+                while (fullName.charAt(i) == ' ') {
+                    fullName = fullName.substring(0, i);
+                    i--;
                 }
+                UI.INSTANCE.decompilerMenu().setStatus("Reading car files ("+fullName+")");
+                carVLTS.add(new CarVLT(vltName, fullName));
             }
         }
+        readPVehicle(attributeFiles, carVLTS);
+        removeInvalid(carVLTS);
+        readEngine(attributeFiles, carVLTS);
+        readTires(attributeFiles, carVLTS);
+        readTransmission(attributeFiles, carVLTS);
+        removeDuplicates(carVLTS);
+        System.out.println("Took "+(System.currentTimeMillis()-ms)+"ms to read cars");
+        ms = System.currentTimeMillis();
+        parsedFile.createNewFile();
+        StringBuilder builder = new StringBuilder((int) Math.pow(2, 16));
+        for (CarVLT carVLT : carVLTS) {
+            builder.append(carVLT.toString());
+        }
+        Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(parsedFile.toPath()), StandardCharsets.UTF_8));
         writer.write(builder.toString());
-        System.out.println("Took "+(System.currentTimeMillis()-ms)+"ms to parse attributes");
+        System.out.println("Took "+(System.currentTimeMillis()-ms)+"ms to parse cars");
+
         writer.close();
         reader.close();
         fileReader.close();
@@ -95,13 +70,331 @@ public class AttributeDecompiler {
         deleteFile(languagesFile);
     }
 
+    private static void removeInvalid(ArrayList<CarVLT> carVLTS) {
+        for (int i = 0; i < carVLTS.size(); i++) {
+            CarVLT carVLT = carVLTS.get(i);
+            if (carVLT.engineVLT == null || carVLT.transmissionVLT == null || carVLT.tiresVLT == null) {
+                System.out.println("remove invalid: "+carVLT.vltName+", "+Arrays.toString(carVLT.engineVLT)+", "+Arrays.toString(carVLT.transmissionVLT)+", "+Arrays.toString(carVLT.tiresVLT));
+                carVLTS.remove(i);
+                i--;
+            }
+        }
+    }
+
+    private static void removeDuplicates(ArrayList<CarVLT> carVLTS) {
+        for (int i = 0; i < carVLTS.size(); i++) {
+            CarVLT carVLT = carVLTS.get(i);
+            for (int j = 0; j < carVLTS.size(); j++) {
+                CarVLT carVLT2 = carVLTS.get(j);
+                if (i != j && carVLT.fullName.equals(carVLT2.fullName)) {
+                    boolean canRemove;
+                    canRemove = Equality.isIntEqualAtIndex(carVLT.STATS, carVLT2.STATS);
+                    canRemove &= Equality.isIntEqualAtIndex(carVLT.RPM, carVLT2.RPM);
+                    canRemove &= Equality.isDoubleEqualAtIndex(carVLT.finalGear, carVLT2.finalGear);
+                    canRemove &= Equality.isDoubleEqualAtIndex(carVLT.torqueSplit, carVLT2.torqueSplit);
+                    canRemove &= Equality.isDoubleEqualAtIndex(carVLT.gearRatio, carVLT2.gearRatio);
+                    canRemove &= Equality.isIntEqualAtIndex(carVLT.sectionWidth, carVLT2.sectionWidth);
+                    canRemove &= Equality.isIntEqualAtIndex(carVLT.aspectRatio, carVLT2.aspectRatio);
+                    canRemove &= Equality.isIntEqualAtIndex(carVLT.rimSize, carVLT2.rimSize);
+                    if (canRemove) {
+                        System.out.println("remove duplicate: "+carVLT.fullName+", "+carVLT.vltName);
+                        carVLTS.remove(j);
+                        j--;
+                        i--;
+                    }
+                }
+            }
+        }
+    }
+
+    private static void readPVehicle(File attributeFile, ArrayList<CarVLT> carVLTS) throws IOException {
+        File pvehicleFile = new File(attributeFile, "main\\attributes\\db\\pvehicle.yml");
+        InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(pvehicleFile.toPath()), StandardCharsets.UTF_8);
+        BufferedReader reader = new BufferedReader(fileReader);
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith("- ParentName:")) {
+                String parentName = line.substring(14);
+                String vehicleName = reader.readLine().substring(8);
+                boolean mainCar = parentName.equals("addon_muscle") || parentName.equals("addon_tuner") || parentName.equals("addon_exotic") || parentName.equals("muscle") || parentName.equals("tuner") || parentName.equals("exotic");
+                boolean rpCar = vehicleName.endsWith("_rp");
+                if (mainCar || rpCar) {
+                    CarVLT carVLT = fromVLTName(vehicleName, carVLTS);
+                    if (carVLT == null && !rpCar) {
+                        System.out.println("PVEHICLE.YML Vehicle name doesn't exist in language file: "+vehicleName);
+                    } else {
+                        if (rpCar) {
+                            carVLT = new CarVLT(vehicleName, fromVLTName(parentName, carVLTS).fullName + " Royal Purple");
+                            carVLTS.add(carVLT);
+                            System.out.println("Royal Purple car: "+vehicleName);
+                        }
+                        skip(reader, 12);
+                        carVLT.STATS = new int[3][4];
+                        //Acceleration Stats
+                        for (int i = 0; i < 4; i++) {
+                            String valueLine = reader.readLine().substring(8);
+                            while (!Character.isDigit(valueLine.charAt(0))) {
+                                valueLine = reader.readLine().substring(8);
+                            }
+                            int value = Integer.parseInt(valueLine);
+                            carVLT.STATS[1][i] = value;
+                        }
+                        skip(reader, 36);
+                        //Engine node
+                        String classKeyEngine = reader.readLine();
+                        while (!classKeyEngine.equals("      - ClassKey: engine")) {
+                            classKeyEngine = reader.readLine();
+                        }
+                        carVLT.engineVLT = new VltNode[4];
+                        for (int i = 0; i < carVLT.engineVLT.length; i++) {
+                            int index = i == 0 ? 0 : 4 - i;
+                            carVLT.engineVLT[index] = new VltNode(carVLT, reader.readLine().substring(23), index);
+                            skip(reader,1);
+                        }
+                        skip(reader, 2);
+                        //Handling Stats
+                        for (int i = 0; i < 4; i++) {
+                            //Thanks wuggie BEHAVIOR_MECHANIC_RESET: ''
+                            String valueLine = reader.readLine().substring(8);
+                            while (!Character.isDigit(valueLine.charAt(0))) {
+                                valueLine = reader.readLine().substring(8);
+                            }
+                            int value = Integer.parseInt(valueLine);
+                            carVLT.STATS[2][i] = value;
+                        }
+                        skip(reader, 19);
+                        //Tires node
+                        String classKeyTires = reader.readLine();
+                        while (!classKeyTires.equals("      - ClassKey: tires")) {
+                            classKeyTires = reader.readLine();
+                        }
+                        carVLT.tiresVLT = new VltNode[4];
+                        for (int i = 0; i < carVLT.tiresVLT.length; i++) {
+                            int index = i == 0 ? 0 : 4 - i;
+                            carVLT.tiresVLT[index] = new VltNode(carVLT, reader.readLine().substring(23), index);
+                            skip(reader,1);
+                        }
+                        skip(reader, 2);
+                        //Top Speed Stats
+                        for (int i = 0; i < 4; i++) {
+                            int value = Integer.parseInt(reader.readLine().substring(8));
+                            carVLT.STATS[0][i] = value;
+                        }
+                        skip(reader, 3);
+                        carVLT.transmissionVLT = new VltNode[4];
+                        String classKeyTransmission = reader.readLine();
+                        while (!classKeyTransmission.equals("      - ClassKey: transmission")) {
+                            classKeyTransmission = reader.readLine();
+                        }
+                        for (int i = 0; i < carVLT.transmissionVLT.length; i++) {
+                            int index = i == 0 ? 0 : carVLT.transmissionVLT.length - i;
+                            carVLT.transmissionVLT[index] = new VltNode(carVLT, reader.readLine().substring(23), index);
+                            if (index != 1) {
+                                skip(reader, 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        reader.close();
+        fileReader.close();
+    }
+
+    private static void readEngine(File attributeFile, ArrayList<CarVLT> carVLTS) throws IOException {
+        File pvehicleFile = new File(attributeFile, "main\\attributes\\db\\engine.yml");
+        InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(pvehicleFile.toPath()), StandardCharsets.UTF_8);
+        BufferedReader reader = new BufferedReader(fileReader);
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith("  Name:")) {
+                String vehicleName = line.substring(8);
+                ArrayList<VltNode> vltNodes = fromVLTEngine(vehicleName, carVLTS);
+                if (vltNodes.isEmpty()) {
+                    System.out.println("ENGINE.YML " + vehicleName + " doesn't exist in any EngineVLTs");
+                } else {
+                    skip(reader, 20);
+                    if (reader.readLine().equals("      Data: []")) {
+                        skip(reader, 6);
+                    } else {
+                        skip(reader, 8);
+                    }
+                    int rpm = Integer.parseInt(reader.readLine().substring(14));
+                    for (VltNode vltNode : vltNodes) {
+                        CarVLT carVLT = vltNode.carVLT();
+                        int index = vltNode.index();
+                        if (carVLT.RPM == null) {
+                            carVLT.RPM = new int[4];
+                        }
+                        carVLT.RPM[index] = rpm;
+                    }
+                    skip(reader, 3);
+                }
+            }
+        }
+        reader.close();
+        fileReader.close();
+    }
+    private static void readTires(File attributeFile, ArrayList<CarVLT> carVLTS) throws IOException {
+        File pvehicleFile = new File(attributeFile, "main\\attributes\\db\\tires.yml");
+        InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(pvehicleFile.toPath()), StandardCharsets.UTF_8);
+        BufferedReader reader = new BufferedReader(fileReader);
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith("  Name:")) {
+                String vehicleName = line.substring(8);
+                ArrayList<VltNode> vltNodes = fromVLTTires(vehicleName, carVLTS);
+                if (vltNodes.isEmpty()) {
+                    System.out.println("TIRES.YML " + vehicleName + " doesn't exist in any TiresVLTs");
+                } else {
+                    skip(reader, 25);
+                    int FSW = Integer.parseInt(reader.readLine().substring(13));
+                    int RSW = Integer.parseInt(reader.readLine().substring(12));
+                    skip(reader, 1);
+                    int FRS = Integer.parseInt(reader.readLine().substring(13));
+                    int RRS = Integer.parseInt(reader.readLine().substring(12));
+                    skip(reader, 7);
+                    int FAR = Integer.parseInt(reader.readLine().substring(13));
+                    int RAR = Integer.parseInt(reader.readLine().substring(12));
+                    for (VltNode vltNode : vltNodes) {
+                        CarVLT carVLT = vltNode.carVLT();
+                        int index = vltNode.index();
+                        if (carVLT.sectionWidth == null) {
+                            carVLT.sectionWidth = new int[4][2];
+                        }
+                        if (carVLT.rimSize == null) {
+                            carVLT.rimSize = new int[4][2];
+                        }
+                        if (carVLT.aspectRatio == null) {
+                            carVLT.aspectRatio = new int[4][2];
+                        }
+                        carVLT.sectionWidth[index][0] = FSW;
+                        carVLT.sectionWidth[index][1] = RSW;
+                        carVLT.rimSize[index][0] = FRS;
+                        carVLT.rimSize[index][1] = RRS;
+                        carVLT.aspectRatio[index][0] = FAR;
+                        carVLT.aspectRatio[index][1] = RAR;
+                    }
+                }
+            }
+        }
+        reader.close();
+        fileReader.close();
+    }
+    private static void readTransmission(File attributeFile, ArrayList<CarVLT> carVLTS) throws IOException {
+        File pvehicleFile = new File(attributeFile, "main\\attributes\\db\\transmission.yml");
+        InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(pvehicleFile.toPath()), StandardCharsets.UTF_8);
+        BufferedReader reader = new BufferedReader(fileReader);
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith("  Name:")) {
+                String vehicleName = line.substring(8);
+                ArrayList<VltNode> carVLTs = fromVLTTransmission(vehicleName, carVLTS);
+                if (carVLTs.isEmpty()) {
+                    System.out.println("TRANSMISSION.YML " + vehicleName + " doesn't exist in any TransmissionVLTs");
+                } else {
+                    skip(reader, 4);
+                    double[] gearRatio = new double[9];
+                    for (int i = 0; i < gearRatio.length+1; i++) {
+                        String newLine = reader.readLine();
+                        if (newLine.charAt(6) == '-') {
+                            gearRatio[i] = roundUp(Double.parseDouble(newLine.substring(8)), 5);
+                        } else {
+                            break;
+                        }
+                    }
+                    skip(reader, 29);
+                    double torqueSplit = roundUp(Double.parseDouble(reader.readLine().substring(17)), 5);
+                    skip(reader, 4);
+                    double finalGear = roundUp(Double.parseDouble(reader.readLine().substring(16)), 5);
+                    skip(reader, 1);
+                    for (VltNode vltNode : carVLTs) {
+                        CarVLT carVLT = vltNode.carVLT();
+                        int index = vltNode.index();
+                        if (carVLT.gearRatio == null) {
+                            carVLT.gearRatio = new double[4][9];
+                        }
+                        if (carVLT.torqueSplit == null) {
+                            carVLT.torqueSplit = new double[4];
+                        }
+                        if (carVLT.finalGear == null) {
+                            carVLT.finalGear = new double[4];
+                        }
+                        System.arraycopy(gearRatio, 0, carVLT.gearRatio[index], 0, gearRatio.length);
+                        carVLT.torqueSplit[index] = torqueSplit;
+                        carVLT.finalGear[index] = finalGear;
+                    }
+                }
+            }
+        }
+        reader.close();
+        fileReader.close();
+    }
+    private static CarVLT fromVLTName(String vltName, ArrayList<CarVLT> carVLTS) {
+        for (CarVLT carVLT : carVLTS) {
+            if (carVLT.vltName.equals(vltName)) {
+                return carVLT;
+            }
+        }
+        return null;
+    }
+    private static ArrayList<VltNode> fromVLTEngine(String vltName, ArrayList<CarVLT> carVLTS) {
+        ArrayList<VltNode> pairs = new ArrayList<>();
+        for (CarVLT carVLT : carVLTS) {
+            for (VltNode vltNode : carVLT.engineVLT) {
+                if (vltNode.name().equals(vltName)) {
+                    pairs.add(vltNode);
+                }
+            }
+        }
+        return pairs;
+    }
+    private static ArrayList<VltNode> fromVLTTires(String vltName, ArrayList<CarVLT> carVLTS) {
+        ArrayList<VltNode> pairs = new ArrayList<>();
+        for (CarVLT carVLT : carVLTS) {
+            for (VltNode vltNode : carVLT.tiresVLT) {
+                if (vltNode.name().equals(vltName)) {
+                    pairs.add(vltNode);
+                }
+            }
+        }
+        return pairs;
+    }
+    private static ArrayList<VltNode> fromVLTTransmission(String vltName, ArrayList<CarVLT> carVLTS) {
+        ArrayList<VltNode> pairs = new ArrayList<>();
+        for (CarVLT carVLT : carVLTS) {
+            for (VltNode vltNode : carVLT.transmissionVLT) {
+                if (vltNode.name().equals(vltName)) {
+                    pairs.add(vltNode);
+                }
+            }
+        }
+        return pairs;
+    }
+    private static void skip(BufferedReader reader, int times) throws IOException {
+        for (int i = 0; i < times; i++) {
+            reader.readLine();
+        }
+    }
+    public static double roundUp(double value, int places) {
+        if (places<0) {
+            throw new IllegalArgumentException();
+        } else {
+            BigDecimal bd = new BigDecimal(value);
+            bd = bd.setScale(places, RoundingMode.HALF_UP);
+            return bd.doubleValue();
+        }
+    }
     public static void unpackAttributes(File attributeFiles) throws IOException, InterruptedException {
         if (!attributeFiles.exists()) {
             UI.INSTANCE.decompilerMenu().setStatus("Unpacking ATTRIBUTE files...");
             String gamePath = String.valueOf(ConfigFile.valueFromName("Game Location"));
-            File globalFile = new File(gamePath + "\\.data\\b2d5f170c62d6e37ac67c04be2235249\\GLOBAL");
+            File globalFile = new File(gamePath,".data\\b2d5f170c62d6e37ac67c04be2235249\\GLOBAL");
             File gcVaults = new File(gamePath + "\\GLOBAL\\gc.vaults");
             File newGcVaults = new File(globalFile, "gc.vaults");
+            if (newGcVaults.exists()) {
+                deleteFile(newGcVaults);
+            }
             if (!newGcVaults.exists()) {
                 gcVaults.mkdir();
             }
@@ -115,37 +408,10 @@ public class AttributeDecompiler {
             String out = s + "attributes" + s;
             String attribulator = s + "decompiler tools\\attribulator\\Attribulator.CLI.exe" + s;
             long ms = System.currentTimeMillis();
-            new ProcessBuilder().command(attribulator, "unpack", "-i", in, "-o", out, "-p", "WORLD", "-f", "yml").start().waitFor();
+            new ProcessBuilder().command(attribulator, "unpack", "-i", in, "-o", out, "-p", "WORLD", "-f", "yml").inheritIO().start().waitFor();
             System.out.println("Took " + (System.currentTimeMillis() - ms) + "ms to unpack attributes");
             deleteFile(newGcVaults);
         }
-    }
-
-    private static String findSubValues(String vltName, String file, Fields fields, String... parentNames) throws IOException {
-        Fields SUB_FILE_VLT = new Fields(
-                new Field(String.class, FilterType.COLON, "Name"));
-        String[] fileVLT = findValues(file, vltName, false, SUB_FILE_VLT, parentNames);
-        //fuck wuggie
-        String subFileVLT = fileVLT[0].replace("_rocket","");
-        String[] subFile = new String[]{"_t","_a","_h"};
-        StringBuilder builder = new StringBuilder();
-        for (String s : subFile) {
-            String[] subFileValues = findValues(file, subFileVLT+s, false, fields, subFileVLT);
-            if (subFileValues == null) {
-                subFileValues = findValues(file, Hasher.HashVLT_MEMORY_STRING(subFileVLT+s), false, fields, subFileVLT);
-            }
-            if (subFileValues != null) {
-                for (String sub : subFileValues) {
-                    builder.append(sub).append(",");
-                }
-            } else {
-                for (int i = 0; i < fields.valueSize; i++) {
-                    builder.append("0,");
-                }
-                System.out.println("sub" + file + "still null for "+vltName+s+", "+Hasher.HashVLT_MEMORY_STRING(subFileVLT+s));
-            }
-        }
-        return builder.toString();
     }
 
     private static void deleteFile(File file) throws IOException {
@@ -155,181 +421,5 @@ public class AttributeDecompiler {
             }
         }
         Files.delete(file.toPath());
-    }
-
-    private static String[] findValues(String file, String from, boolean parentSearch, Fields fields, String... parentNames) throws IOException {
-        InputStreamReader fileReader = new InputStreamReader(Files.newInputStream(new File("attributes\\main\\attributes\\db\\" + file+".yml").toPath()), StandardCharsets.UTF_8);
-        BufferedReader reader = new BufferedReader(fileReader);
-        String line;
-        boolean startReading = false;
-        String parentName = null;
-        while ((line = reader.readLine()) != null) {
-            if (line.contains("- ParentName:")) {
-                parentName = line.split(":")[1].substring(1);
-            }
-            if (parentName != null && line.startsWith("  Name:")) {
-                String vltName = line.split(":")[1].substring(1);
-                boolean check = false;
-                for (String name : parentNames) {
-                    if (parentName.equals(name)) {
-                        check = true;
-                        break;
-                    }
-                }
-                if (vltName.equals(from) && (parentSearch ? check || from.contains("_") : check)) {
-                    startReading = true;
-                }
-            }
-            if (startReading) {
-                String[] split = line.split(":");
-                if (split.length == 2 || line.charAt(line.length()-1) == ':') {
-                    for (Field field : fields.fields) {
-                        String names = field.fieldName;
-                        if (split[0].contains(names)) {
-                            for (int i = 0; i < field.skipCount; i++) {
-                                line = reader.readLine();
-                            }
-                            switch (field.type) {
-                                case COLON: {
-                                    field.setValue(0, line.split(":")[1].substring(1));
-                                    break;
-                                }
-                                case COLON_ARRAY: {
-                                    for (int i = 0; i < field.valueCount; i++) {
-                                        String value = reader.readLine().split(":")[1].substring(1);
-                                        field.setValue(i, value);
-                                    }
-                                    break;
-                                }
-                                case HYPHEN: {
-                                    for (int i = 0; i < field.valueCount; i++) {
-                                        String newLine = reader.readLine();
-                                        String[] newSplit = newLine.split("-");
-                                        if (newSplit.length == 2) {
-                                            String value = newSplit[1].substring(1);
-                                            field.setValue(i, value);
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                            if (!fields.hasAnyNullValues()) {
-                                reader.close();
-                                fileReader.close();
-                                return fields.toStringArray();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        reader.close();
-        fileReader.close();
-        if (file.equals("pvehicle")) {
-            //System.out.printf("Couldn't find %s values for %s\n", file, from);
-            return null;
-        }
-        String[] s = findValues("pvehicle", from, false, new Fields(new Field(String.class, FilterType.COLON_ARRAY, file, 1, 3)), P_NAMES);
-        String parentVLT;
-        if (s != null && (parentVLT = s[0]) != null) {
-            String[] vlt = findValues(file, parentVLT, true, fields, parentNames);
-            if (vlt != null) {
-                return vlt;
-            } else {
-                //System.out.printf("Parent %s null for %s, %s\n", file, from, parentVLT);
-                return null;
-            }
-        } else {
-            //System.out.printf("Couldn't find %s values for %s\n", file, from);
-        }
-        return null;
-    }
-
-    static class Fields {
-        Field[] fields;
-        int valueSize;
-
-        Fields(Field... fields) {
-            this.fields = fields;
-            for (Field field : fields) {
-                valueSize += Math.max(1, field.valueCount);
-            }
-        }
-
-        public boolean hasAnyNullValues() {
-            for (Field field : fields) {
-                for (Object o : field.values) {
-                    if (o == null && !field.ignoreNull) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public String[] toStringArray() {
-            String[] values = new String[valueSize];
-            int i = 0;
-            for (Field field : fields) {
-                for (Object o : field.values) {
-                    if (field.genericClass == int.class) {
-                        if (o == null) {
-                            o = 0;
-                        }
-                    } else if (field.genericClass == double.class) {
-                        if (o == null) {
-                            o = 0.0;
-                        }
-                    }
-                    values[i] = String.valueOf(o);
-                    i++;
-                }
-            }
-            return values;
-        }
-    }
-
-    static class Field {
-        String fieldName;
-        FilterType type;
-        int valueCount;
-        int skipCount;
-        boolean ignoreNull;
-        Object[] values;
-        Class<?> genericClass;
-
-        <T> Field(Class<T> clazz, FilterType type, String fieldName) {
-            this.type = type;
-            this.fieldName = fieldName;
-            this.genericClass = clazz;
-            this.values = new Object[1];
-        }
-        <T> Field(Class<T> clazz, FilterType type, String fieldName, int valueCount) {
-            this(clazz, type, fieldName);
-            this.valueCount = valueCount;
-            this.values = new Object[Math.max(1, this.valueCount)];
-        }
-        <T> Field(Class<T> clazz, FilterType type, String fieldName, int valueCount, int skipCount) {
-            this(clazz, type, fieldName, valueCount);
-            this.skipCount = skipCount;
-        }
-        <T> Field(Class<T> clazz, FilterType type, String fieldName, int valueCount, int skipCount, boolean ignoreNull) {
-            this(clazz, type, fieldName, valueCount, skipCount);
-            this.ignoreNull = ignoreNull;
-        }
-
-        public void setValue(int index, String string) {
-            if (genericClass == int.class) {
-                this.values[index] = Integer.parseInt(string);
-            } else if (genericClass == double.class) {
-                this.values[index] = Double.parseDouble(string);
-            } else if (genericClass == String.class) {
-                this.values[index] = string;
-            }
-        }
-    }
-
-    enum FilterType {
-        COLON, COLON_ARRAY, HYPHEN
     }
 }

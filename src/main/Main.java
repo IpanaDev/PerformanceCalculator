@@ -11,20 +11,20 @@ import ui.UI;
 import java.io.*;
 public class Main {
 
-    public static void main(String[] args) throws IllegalAccessException, IOException, InterruptedException {
+    public static void main(String[] args) throws IllegalAccessException, IOException, InterruptedException, NoSuchFieldException {
         File cars = new File("cars.txt");
         File parts = new File("parts");
         UI.init();
         ConfigFile.init();
+        UI.INSTANCE.decompilerMenu().init();
         if (!cars.exists()) {
-            UI.INSTANCE.decompilerMenu().init();
             LangDecompiler.start();
             AttributeDecompiler.start(parts, cars);
         }
         if (!parts.exists()) {
-            UI.INSTANCE.decompilerMenu().init();
             PartDecompiler.start(parts);
         }
+        UI.INSTANCE.decompilerMenu().setStatus("Loading...");
         Parts.init();
         Cars.init();
         UI.INSTANCE.performanceMenu().init();
