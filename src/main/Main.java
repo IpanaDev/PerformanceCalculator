@@ -9,8 +9,9 @@ import performance.Parts;
 import ui.UI;
 
 import java.io.*;
-public class Main {
 
+public class Main {
+    
     public static void main(String[] args) throws IllegalAccessException, IOException, InterruptedException, NoSuchFieldException {
         File cars = new File("cars.txt");
         File parts = new File("parts");

@@ -4,9 +4,9 @@ public class Car {
     private int[] tStats, aStats, hStats;
     private double[] cTStats, cAStats, cHStats;
     private String vltName, fullName;
-    private int[] RPM;
-    private int[] aspectRatio, sectionWidth, rimSize;
-    private double[] gearRatio, finalGear, torqueSplit;
+    public int[] RPM;
+    public int[] aspectRatio, sectionWidth, rimSize;
+    public double[] gearRatio, finalGear, torqueSplit;
     public double[] RIM_SIZE, SECTION_WIDTH, ASPECT_RATIO, FINAL_DRIVE, cRPM;
     public double[][] GEAR_RATIO;
     public int MAX_GEAR_INDEX;

@@ -13,16 +13,20 @@ public class Result {
     private PerfPart brakes = PerfPart.EMPTY_BRAKES;
     private PerfPart tires = PerfPart.EMPTY_TIRES;
     private double topSpeed, acceleration, handling, realTopSpeed;
+    private int tGain, aGain, hGain;
     private int rating;
     private long time;
 
-    public void set(PerfPart engine, PerfPart turbo, PerfPart trans, PerfPart suspension, PerfPart brakes, PerfPart tires, double realTopSpeed, double topSpeed, double acceleration, double handling, int rating) {
+    public void set(PerfPart engine, PerfPart turbo, PerfPart trans, PerfPart suspension, PerfPart brakes, PerfPart tires, int tGain, int aGain, int hGain, double realTopSpeed, double topSpeed, double acceleration, double handling, int rating) {
         this.engine = engine;
         this.turbo = turbo;
         this.trans = trans;
         this.suspension = suspension;
         this.brakes = brakes;
         this.tires = tires;
+        this.tGain = tGain;
+        this.aGain = aGain;
+        this.hGain = hGain;
         this.realTopSpeed = realTopSpeed;
         this.topSpeed = topSpeed;
         this.acceleration = acceleration;
@@ -93,6 +97,18 @@ public class Result {
 
     public double realTopSpeed() {
         return realTopSpeed;
+    }
+
+    public int tGain() {
+        return tGain;
+    }
+
+    public int aGain() {
+        return aGain;
+    }
+
+    public int hGain() {
+        return hGain;
     }
 
     public int rating() {

@@ -39,7 +39,7 @@ public class PerfCalculator {
         double finalClass = ((int) tStat + (int) aStat + (int) hStat) / 3d;
         int finalClassInt = (int) finalClass;
         final Result result = new Result();
-        result.set(engine, turbo, trans, suspension, brakes, tires,0, tStat, aStat, hStat, finalClassInt);
+        result.set(engine, turbo, trans, suspension, brakes, tires,tGain, aGain, hGain, 0, tStat, aStat, hStat, finalClassInt);
         //System.out.println("Search took (" + (System.currentTimeMillis() - ms) + "ms)");
         //System.out.println(result);
         return result;
@@ -94,15 +94,15 @@ public class PerfCalculator {
                                 int tGain = brakeSum.t() + tires.tGain();
                                 int aGain = brakeSum.a() + tires.aGain();
                                 int hGain = brakeSum.h() + tires.hGain();
-                                double commonDivisor = 150.0 + tGain + aGain + hGain;
+                                int commonDivisor = 150 + tGain + aGain + hGain;
                                 double finalTopSpeed = (tGain*tValue0 + aGain*tValue1 + hGain*tValue2 + tValue3) / commonDivisor;
                                 double finalAccel = (tGain*aValue0 + aGain*aValue1 + hGain*aValue2 + aValue3) / commonDivisor;
                                 double finalHandling = (tGain*hValue0 + aGain*hValue1 + hGain*hValue2 + hValue3) / commonDivisor;
                                 double finalClass = ((int)finalTopSpeed + (int)finalAccel + (int)finalHandling) / 3d;
                                 int finalClassInt = (int) finalClass;
                                 if (finalClassInt >= overall.min() && finalClassInt <= overall.max()) {
-                                    double real = priority == Priority.R ? calcRealTopSpeed(car, tGain, aGain, hGain) : 0;
-                                    priority.handle(result, real, finalTopSpeed, finalAccel, finalHandling, finalClassInt, engine, turbo, trans, suspension, brakes, tires);
+                                    double real = priority == Priority.TOP_SPEED_KMH ? calcRealTopSpeed(car, tGain, aGain, hGain) : 0;
+                                    priority.handle(result, tGain, aGain, hGain, real, finalTopSpeed, finalAccel, finalHandling, finalClassInt, engine, turbo, trans, suspension, brakes, tires);
                                 }
                             }
                         }
@@ -115,21 +115,28 @@ public class PerfCalculator {
     }
 
     private static double calcRealTopSpeed(Car car, int t, int a, int h) {
-        int tGain = t;
-        int aGain = a;
-        int hGain = h;
-        if (tGain < 0) {
-            tGain *= -(aGain+hGain)/300;
+        double tGain = t;
+        double aGain = a;
+        double hGain = h;
+        if (t < 0) {
+            double m = 150.0 / (150 + t);
+            aGain *= m;
+            hGain *= m;
+            tGain = 0;
         }
-
-        if (aGain < 0) {
-            aGain *= -(tGain+hGain)/25;
+        if (a < 0) {
+            double m = 150.0 / (150 + a);
+            tGain *= m;
+            hGain *= m;
+            aGain = 0;
         }
-
-        if (hGain < 0) {
-            hGain *= -(tGain+aGain)/100;
+        if (h < 0) {
+            double m = 150.0 / (150 + h);
+            tGain *= m;
+            aGain *= m;
+            hGain = 0;
         }
-        int commonDivisor = 150 + tGain + aGain + hGain;
+        double commonDivisor = 150 + tGain + aGain + hGain;
         double FINAL_DRIVE = partCalc(tGain, aGain, hGain, commonDivisor, car.FINAL_DRIVE);
         double RPM = partCalc(tGain, aGain, hGain, commonDivisor, car.cRPM);
         double RIM_SIZE = partCalc(tGain, aGain, hGain, commonDivisor, car.RIM_SIZE);
@@ -137,9 +144,9 @@ public class PerfCalculator {
         double ASPECT_RATIO = partCalc(tGain, aGain, hGain, commonDivisor, car.ASPECT_RATIO);
         double GEAR_RATIO = car.gearRatio().length == 9 ? car.gearRatio()[car.MAX_GEAR_INDEX] : partCalc(tGain, aGain, hGain, commonDivisor, car.GEAR_RATIO[car.MAX_GEAR_INDEX]);
         double TyreCircumference = Math.PI * (RIM_SIZE * 25.4 + ((SECTION_WIDTH * ASPECT_RATIO) / 50));
-        return ((RPM / GEAR_RATIO / FINAL_DRIVE) * TyreCircumference) * 0.00006;
+        return (RPM / GEAR_RATIO / FINAL_DRIVE) * TyreCircumference * 0.00006;
     }
-    private static double partCalc(int tGain, int aGain, int hGain, int commonDivisor, double[] array) {
+    private static double partCalc(double tGain, double aGain, double hGain, double commonDivisor, double[] array) {
         return array.length == 1 ? array[0] : (tGain*array[0] + aGain*array[1] + hGain*array[2] + array[3]) / commonDivisor;
     }
 }

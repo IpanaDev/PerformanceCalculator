@@ -24,8 +24,8 @@ public class PerformanceMenu extends Menu {
     public JComboBox<Car> selectedCar;
     public JComboBox<Overall> selectedClass;
     public JComboBox<ValueFilter> selectedParts;
-    private PriorityLabel selectedPriorityLabel;
-    public Priority selectedPriority = Priority.T_A_H;
+    public PriorityLabel selectedPriorityLabel;
+    public Priority selectedPriority = Priority.STAT_T_A_H;
     private ResultLabel resultLabel;
     private TopSpeedLabel topSpeedLabel;
 
@@ -74,11 +74,10 @@ public class PerformanceMenu extends Menu {
                 resultLabel.setLabelText(4, result.brakes().name());
                 resultLabel.setLabelText(5, result.tires().name());
                 resultLabel.setLabelText(6, String.valueOf(result.rating()));
-                resultLabel.setLabelText(7, String.valueOf(result.topSpeed()));
-                resultLabel.setLabelText(8, String.valueOf(result.acceleration()));
-                resultLabel.setLabelText(9, String.valueOf(result.handling()));
-                resultLabel.setLabelText(10, result.costString());
-                resultLabel.setLabelText(11, "Took "+result.time() +"ms");
+                resultLabel.setLabelText(7, "T: "+(int)result.topSpeed()+", A: "+(int)result.acceleration()+", H: "+(int)result.handling());
+                resultLabel.setLabelText(8, "T: "+result.tGain()+", A: "+result.aGain()+", H: "+result.hGain());
+                resultLabel.setLabelText(9, result.costString());
+                resultLabel.setLabelText(10, "Took "+result.time() +"ms");
                 topSpeedLabel.calcAndSet(result, (Car) selectedCar.getModel().getSelectedItem());
                 find.setText("Find");
                 gui().getContentPane().repaint();
@@ -94,15 +93,7 @@ public class PerformanceMenu extends Menu {
         this.resultLabel = new ResultLabel(this, 20, 230, 380, 36);
         this.topSpeedLabel = new TopSpeedLabel(gui(), 400, 230, 380, 36);
         this.selectedParts.addActionListener(l -> {
-            ValueFilter filter = (ValueFilter) this.selectedParts.getModel().getSelectedItem();
-            if (filter == ValueFilter.GREEN_VALUES) {
-                this.selectedPriority = Priority.T_A_H;
-            } else if (filter == ValueFilter.BLUE_VALUES) {
-                this.selectedPriority = Priority.A_T_H;
-            } else if (filter == ValueFilter.RED_VALUES) {
-                this.selectedPriority = Priority.H_A_T;
-            }
-            this.selectedPriorityLabel.updateChildLabels(this);
+            this.selectedPriorityLabel.updateTab(this);
             this.resultLabel.handleVisibility(this);
         });
         searchCar.addKeyListener(new KeyListener() {
