@@ -41,7 +41,6 @@ public class UI extends JFrame {
         this.setSize(930, 600);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);// this also destroys current program
         this.setVisible(true);
-
     }
 
     public static void init() throws IllegalAccessException {

@@ -1,6 +1,8 @@
 package utils;
 
-@FunctionalInterface
-public interface OctaBoolConsumer<A, B, C, D, E, F, G, H> {
-    boolean accept(A a, B b, C c, D d, E e, F f, G g, H h);
+import calculators.result.Result;
+import performance.PerfPart;
+
+public interface OctaBoolConsumer {
+    boolean check(Result result, int tGain, int aGain, int hGain, double speedKMH, double tStat, double aStat, double hStat, PerfPart engine, PerfPart turbo, PerfPart trans, PerfPart suspension, PerfPart brakes, PerfPart tires);
 }

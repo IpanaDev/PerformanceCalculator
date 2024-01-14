@@ -1,4 +1,4 @@
-package calculators;
+package calculators.result;
 
 import performance.*;
 
@@ -6,16 +6,16 @@ import javax.swing.text.NumberFormatter;
 import java.text.ParseException;
 
 public class Result {
-    private PerfPart engine = PerfPart.EMPTY_ENGINE;
-    private PerfPart turbo = PerfPart.EMPTY_TURBO;
-    private PerfPart trans = PerfPart.EMPTY_TRANSMISSION;
-    private PerfPart suspension = PerfPart.EMPTY_SUSPENSION;
-    private PerfPart brakes = PerfPart.EMPTY_BRAKES;
-    private PerfPart tires = PerfPart.EMPTY_TIRES;
-    private double topSpeed, acceleration, handling, realTopSpeed;
-    private int tGain, aGain, hGain;
-    private int rating;
-    private long time;
+    private volatile PerfPart engine = PerfPart.EMPTY_ENGINE;
+    private volatile PerfPart turbo = PerfPart.EMPTY_TURBO;
+    private volatile PerfPart trans = PerfPart.EMPTY_TRANSMISSION;
+    private volatile PerfPart suspension = PerfPart.EMPTY_SUSPENSION;
+    private volatile PerfPart brakes = PerfPart.EMPTY_BRAKES;
+    private volatile PerfPart tires = PerfPart.EMPTY_TIRES;
+    private volatile double topSpeed, acceleration, handling, realTopSpeed;
+    private volatile int tGain, aGain, hGain;
+    private volatile int rating;
+    private volatile long time;
 
     public void set(PerfPart engine, PerfPart turbo, PerfPart trans, PerfPart suspension, PerfPart brakes, PerfPart tires, int tGain, int aGain, int hGain, double realTopSpeed, double topSpeed, double acceleration, double handling, int rating) {
         this.engine = engine;
@@ -36,7 +36,7 @@ public class Result {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("calculators.Result{");
+        final StringBuilder sb = new StringBuilder("calculators.result.DefaultResult{");
         sb.append("engine=").append(engine);
         sb.append(", turbo=").append(turbo);
         sb.append(", trans=").append(trans);
@@ -116,6 +116,9 @@ public class Result {
     }
 
     public int cost() {
+        return engine.price() + turbo.price() + trans.price() + suspension.price() + brakes.price() + tires.price();
+    }
+    public static int cost(PerfPart engine, PerfPart turbo, PerfPart trans, PerfPart suspension, PerfPart brakes, PerfPart tires) {
         return engine.price() + turbo.price() + trans.price() + suspension.price() + brakes.price() + tires.price();
     }
     public String costString() throws ParseException {

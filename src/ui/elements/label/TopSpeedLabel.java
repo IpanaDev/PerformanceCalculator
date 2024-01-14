@@ -1,6 +1,6 @@
 package ui.elements.label;
 
-import calculators.Result;
+import calculators.result.Result;
 import cars.Car;
 import ui.UI;
 
@@ -51,29 +51,21 @@ public class TopSpeedLabel {
             hGain = 0;
         }
         double commonDivisor = 150 + tGain + aGain + hGain;
-        double FINAL_DRIVE = partCalc(tGain, aGain, hGain, commonDivisor, car.FINAL_DRIVE);
-        double RPM = partCalc(tGain, aGain, hGain, commonDivisor, car.cRPM);
-        double RIM_SIZE = partCalc(tGain, aGain, hGain, commonDivisor,car.RIM_SIZE);
-        double SECTION_WIDTH = partCalc(tGain, aGain, hGain, commonDivisor,car.SECTION_WIDTH);
-        double ASPECT_RATIO = partCalc(tGain, aGain, hGain, commonDivisor,car.ASPECT_RATIO);
+        double FINAL_DRIVE = car.FINAL_DRIVE.calculate(tGain, aGain, hGain, commonDivisor);
+        double RPM = car.cRPM.calculate(tGain, aGain, hGain, commonDivisor);
+        double RIM_SIZE = car.RIM_SIZE.calculate(tGain, aGain, hGain, commonDivisor);
+        double SECTION_WIDTH = car.SECTION_WIDTH.calculate(tGain, aGain, hGain, commonDivisor);
+        double ASPECT_RATIO = car.ASPECT_RATIO.calculate(tGain, aGain, hGain, commonDivisor);
 
         double TyreCircumference = Math.PI * (RIM_SIZE * 25.4 + ((SECTION_WIDTH * ASPECT_RATIO) / 50));
         for (int i = 2; i < 9; i++) {
-            double gearRatio = car.gearRatio().length > 9 ? partCalc(tGain, aGain, hGain, commonDivisor,car.GEAR_RATIO[i]) : car.gearRatio()[i];
+            double gearRatio =  car.GEAR_RATIO[i].calculate(tGain, aGain, hGain, commonDivisor);
             if (gearRatio <= 0) {
                 jLabels[i - 2].setText("");
                 continue;
             }
             double speedKMH = (RPM / gearRatio / FINAL_DRIVE) * TyreCircumference * 0.00006;
             setSpeed(jLabels[i - 2], speedKMH);
-        }
-    }
-    private double partCalc(double tGain, double aGain, double hGain, double commonDivisor, double[] array) {
-        if (array.length == 1) {
-            return array[0];
-        } else {
-            double calc = tGain*array[0] + aGain*array[1] + hGain*array[2] + array[3];
-            return calc/commonDivisor;
         }
     }
 }

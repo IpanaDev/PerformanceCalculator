@@ -18,7 +18,7 @@ public class ResultLabel {
 
     public ResultLabel(PerformanceMenu menu, int x, int y, int width, int height) {
         this.labels = new ArrayList<>();
-        String[] labelNames = {"Engine","Turbo","Transmission","Suspension","Brakes","Tires","Rating","Stats","Node Gains","Cost","Time"};
+        String[] labelNames = {"Engine","Turbo","Transmission","Suspension","Brakes","Tires","Rating","Stats","Node Gains","Cost","Nos Level","Time"};
         int posX = x;
         int posY = y;
         for (int i = 0; i < labelNames.length; i++) {
@@ -48,7 +48,7 @@ public class ResultLabel {
     }
 
     public void handleVisibility(PerformanceMenu menu) {
-        boolean customParts = menu.selectedParts.getModel().getSelectedItem() == ValueFilter.VALUES;
+        boolean customParts = menu.selectedParts.getModel().getSelectedItem() == ValueFilter.CUSTOM;
         for (int i = 0; i < 6; i++) {
             labels.get(i).setVisible(!customParts);
         }

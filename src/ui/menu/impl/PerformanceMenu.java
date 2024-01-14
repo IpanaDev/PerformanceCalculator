@@ -1,8 +1,8 @@
 package ui.menu.impl;
 
 import calculators.PerfCalculator;
-import calculators.Result;
 import calculators.priority.Priority;
+import calculators.result.Result;
 import cars.Car;
 import cars.Cars;
 import cars.Overall;
@@ -45,45 +45,47 @@ public class PerformanceMenu extends Menu {
         JButton find = gui().createButton("Find",20,520, 80, 25, null);
         find.setToolTipText("Find the best combination.");
         find.addActionListener(action -> {
-            try {
-                find.setText("Searching");
-                gui().getContentPane().update(gui().getContentPane().getGraphics());
-                boolean customParts = selectedParts.getModel().getSelectedItem() == ValueFilter.VALUES;
-                Result result;
-                if (!customParts) {
-                    result = PerfCalculator.findFast(
-                            (Car) selectedCar.getModel().getSelectedItem(),
-                            (Overall) selectedClass.getModel().getSelectedItem(),
-                            (ValueFilter) selectedParts.getModel().getSelectedItem(),
-                            selectedPriority);
-                } else {
-                    result = PerfCalculator.find(
-                            (Car) selectedCar.getModel().getSelectedItem(),
-                            new PerfPart[]{
-                                    (PerfPart) resultLabel.engineParts.getModel().getSelectedItem(),
-                                    (PerfPart) resultLabel.turboParts.getModel().getSelectedItem(),
-                                    (PerfPart) resultLabel.transmissionParts.getModel().getSelectedItem(),
-                                    (PerfPart) resultLabel.suspensionParts.getModel().getSelectedItem(),
-                                    (PerfPart) resultLabel.brakeParts.getModel().getSelectedItem(),
-                                    (PerfPart) resultLabel.tireParts.getModel().getSelectedItem()});
+            find.setText("Searching");
+            new Thread(() -> {
+                try {
+                    boolean customParts = selectedParts.getModel().getSelectedItem() == ValueFilter.CUSTOM;
+                    Result result;
+                    Car car = (Car) selectedCar.getModel().getSelectedItem();
+                    if (!customParts) {
+                        result = PerfCalculator.findMultiThread(
+                                car,
+                                (Overall) selectedClass.getModel().getSelectedItem(),
+                                (ValueFilter) selectedParts.getModel().getSelectedItem(),
+                                selectedPriority);
+                    } else {
+                        result = PerfCalculator.find(
+                                car,
+                                new PerfPart[]{
+                                        (PerfPart) resultLabel.engineParts.getModel().getSelectedItem(),
+                                        (PerfPart) resultLabel.turboParts.getModel().getSelectedItem(),
+                                        (PerfPart) resultLabel.transmissionParts.getModel().getSelectedItem(),
+                                        (PerfPart) resultLabel.suspensionParts.getModel().getSelectedItem(),
+                                        (PerfPart) resultLabel.brakeParts.getModel().getSelectedItem(),
+                                        (PerfPart) resultLabel.tireParts.getModel().getSelectedItem()});
+                    }
+                    resultLabel.setLabelText(0, result.engine().name());
+                    resultLabel.setLabelText(1, result.turbo().name());
+                    resultLabel.setLabelText(2, result.trans().name());
+                    resultLabel.setLabelText(3, result.suspension().name());
+                    resultLabel.setLabelText(4, result.brakes().name());
+                    resultLabel.setLabelText(5, result.tires().name());
+                    resultLabel.setLabelText(6, String.valueOf(result.rating()));
+                    resultLabel.setLabelText(7, "T: " + (int) result.topSpeed() + ", A: " + (int) result.acceleration() + ", H: " + (int) result.handling());
+                    resultLabel.setLabelText(8, "T: " + result.tGain() + ", A: " + result.aGain() + ", H: " + result.hGain());
+                    resultLabel.setLabelText(9, result.costString());
+                    resultLabel.setLabelText(10, car.nosLevel());
+                    resultLabel.setLabelText(11, "Took " + result.time() + "ms");
+                    topSpeedLabel.calcAndSet(result, (Car) selectedCar.getModel().getSelectedItem());
+                    find.setText("Find");
+                } catch (IllegalAccessException | NoSuchFieldException | ParseException e) {
+                    throw new RuntimeException(e);
                 }
-                resultLabel.setLabelText(0, result.engine().name());
-                resultLabel.setLabelText(1, result.turbo().name());
-                resultLabel.setLabelText(2, result.trans().name());
-                resultLabel.setLabelText(3, result.suspension().name());
-                resultLabel.setLabelText(4, result.brakes().name());
-                resultLabel.setLabelText(5, result.tires().name());
-                resultLabel.setLabelText(6, String.valueOf(result.rating()));
-                resultLabel.setLabelText(7, "T: "+(int)result.topSpeed()+", A: "+(int)result.acceleration()+", H: "+(int)result.handling());
-                resultLabel.setLabelText(8, "T: "+result.tGain()+", A: "+result.aGain()+", H: "+result.hGain());
-                resultLabel.setLabelText(9, result.costString());
-                resultLabel.setLabelText(10, "Took "+result.time() +"ms");
-                topSpeedLabel.calcAndSet(result, (Car) selectedCar.getModel().getSelectedItem());
-                find.setText("Find");
-                gui().getContentPane().repaint();
-            } catch (IllegalAccessException | NoSuchFieldException | ParseException e) {
-                throw new RuntimeException(e);
-            }
+            }).start();
         });
         JTextField searchCar = gui().createTextField("", 20, 20, 380, 25);
         this.selectedCar = gui().createComboBox(Cars.CARS.toArray(new Car[0]), 600, 20, 300, 25,23);
@@ -96,6 +98,7 @@ public class PerformanceMenu extends Menu {
             this.selectedPriorityLabel.updateTab(this);
             this.resultLabel.handleVisibility(this);
         });
+
         searchCar.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {

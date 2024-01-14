@@ -9,6 +9,9 @@ import performance.Parts;
 import ui.UI;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 public class Main {
     
@@ -28,6 +31,8 @@ public class Main {
         UI.INSTANCE.decompilerMenu().setStatus("Loading...");
         Parts.init();
         Cars.init();
+        System.gc();
         UI.INSTANCE.performanceMenu().init();
+
     }
 }

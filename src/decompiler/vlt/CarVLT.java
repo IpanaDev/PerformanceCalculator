@@ -11,6 +11,7 @@ public class CarVLT {
     public double[][] gearRatio;
     public double[] torqueSplit;
     public double[] finalGear;
+    public int nosLevel = -1;
 
     public CarVLT(String vltName, String fullName) {
         this.vltName = vltName;
@@ -22,6 +23,7 @@ public class CarVLT {
         final StringBuffer sb = new StringBuffer();
         sb.append("vltName=").append(vltName);
         sb.append(",fullName=").append(fullName);
+        sb.append(",nosLevel=").append(nosLevel);
         sb.append(",tStats=");
         for (int t : STATS[0]) {
             sb.append(t).append("|");

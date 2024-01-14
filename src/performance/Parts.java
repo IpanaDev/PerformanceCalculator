@@ -19,10 +19,10 @@ public class Parts {
     }
 
     public static void init() throws IOException {
-        System.out.println("Performance parts initialize");
         for (Type type : Type.VALUES) {
             PARTS[type.ordinal()].load(type, type.fileName());
         }
+        System.out.println("Performance parts initialized");
     }
 
     public PerfPart[] VALUES;
@@ -78,8 +78,8 @@ public class Parts {
     private boolean sameGains(PerfPart part, ArrayList<PerfPart> parts) {
         for (PerfPart partToCompare : parts) {
             if (part.tGain() == partToCompare.tGain() && part.aGain() == partToCompare.aGain() && part.hGain() == partToCompare.hGain()) {
-                if (part.price() > partToCompare.price()) {
-                    parts.set(parts.indexOf(part), partToCompare);
+                if (partToCompare.price() > part.price()) {
+                    parts.set(parts.indexOf(partToCompare), part);
                 }
                 return true;
             }

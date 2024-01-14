@@ -162,7 +162,16 @@ public class AttributeDecompiler {
                             int value = Integer.parseInt(valueLine);
                             carVLT.STATS[2][i] = value;
                         }
-                        skip(reader, 19);
+                        skip(reader, 14);
+
+                        //Engine node
+                        String classKeyNos = reader.readLine();
+                        while (!classKeyNos.equals("      - ClassKey: nos")) {
+                            classKeyNos = reader.readLine();
+                        }
+
+                        carVLT.nosLevel = toLevel(reader.readLine().substring(23));
+
                         //Tires node
                         String classKeyTires = reader.readLine();
                         while (!classKeyTires.equals("      - ClassKey: tires")) {
@@ -384,6 +393,16 @@ public class AttributeDecompiler {
             bd = bd.setScale(places, RoundingMode.HALF_UP);
             return bd.doubleValue();
         }
+    }
+    private static int toLevel(String nodeName) {
+        switch (nodeName) {
+            case "nos_top": return 4;
+            case "nos_base": return 3;
+            case "0x9BCC9CC7": return 2;
+            case "0x79A84534": return 1;
+            case "0xEBEA290E": return 0;
+        }
+        return -1;
     }
     public static void unpackAttributes(File attributeFiles) throws IOException, InterruptedException {
         if (!attributeFiles.exists()) {

@@ -7,7 +7,8 @@ public enum ValueFilter {
     BLUE_VALUES("Blue Parts"),
     RED_VALUES("Red Parts"),
     WHITE_VALUES("White Parts"),
-    VALUES("Custom Parts");
+    VALUES("All Parts"),
+    CUSTOM("Custom Parts");
 
     ValueFilter(String name) {
         this.name = name;
