@@ -5,10 +5,10 @@ import ui.menu.Menu;
 
 import javax.swing.*;
 
-public class DecompilerMenu extends Menu {
+public class StatusMenu extends Menu {
     private JLabel label;
 
-    public DecompilerMenu(UI ui) {
+    public StatusMenu(UI ui) {
         super(ui);
     }
 

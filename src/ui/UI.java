@@ -4,7 +4,7 @@ import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import config.ConfigFile;
 import main.Main;
 import ui.menu.impl.ConfigMenu;
-import ui.menu.impl.DecompilerMenu;
+import ui.menu.impl.StatusMenu;
 import ui.menu.impl.PerformanceMenu;
 
 import javax.swing.*;
@@ -18,7 +18,7 @@ public class UI extends JFrame {
     public static Border BUTTON_BORDER;
     private PerformanceMenu performanceMenu = new PerformanceMenu(this);
     private ConfigMenu configMenu = new ConfigMenu(this);
-    private DecompilerMenu decompilerMenu = new DecompilerMenu(this);
+    private StatusMenu statusMenu = new StatusMenu(this);
     public static UI INSTANCE;
 
     static {
@@ -64,8 +64,8 @@ public class UI extends JFrame {
         return configMenu;
     }
 
-    public DecompilerMenu decompilerMenu() {
-        return decompilerMenu;
+    public StatusMenu statusMenu() {
+        return statusMenu;
     }
 
     public JTextField createTextField(String text, int x, int y, int width, int height) {

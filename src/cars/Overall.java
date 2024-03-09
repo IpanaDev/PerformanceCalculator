@@ -7,7 +7,8 @@ public enum Overall {
     B_CLASS("B Class",500,599),
     A_CLASS("A Class",600,749),
     S1_CLASS("S1 Class",750,849),
-    S2_CLASS("S2 Class",850, 1000);
+    S2_CLASS("S2 Class",850, 1000),
+    CUSTOM("Custom OA",0, 0);
 
     Overall(String name, int min, int max) {
         this.name = name;
@@ -30,5 +31,8 @@ public enum Overall {
 
     public int max() {
         return max;
+    }
+    public void max(int max) {
+        this.max = max;
     }
 }

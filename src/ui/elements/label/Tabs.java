@@ -1,9 +1,9 @@
 package ui.elements.label;
 
 public enum Tabs {
-    STAT("Stat", "T", "A", "H"),
     NODE("Node Gain", "T", "A", "H"),
-    TOP_SPEED_KMH("Speed KMH");
+    TOP_SPEED_KMH("Speed KMH"),
+    ACCEL("Acceleration");
 
     private String name;
     private String[] fieldNames;

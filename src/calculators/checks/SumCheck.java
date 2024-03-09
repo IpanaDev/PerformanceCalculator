@@ -1,8 +1,8 @@
 package calculators.checks;
 
 public class SumCheck {
-    private volatile int topSpeed, acceleration, handling;
-    private volatile SumCheck prevSum;
+    private int topSpeed, acceleration, handling;
+    private SumCheck prevSum;
 
     public SumCheck(SumCheck prevSum) {
         this.prevSum = prevSum;

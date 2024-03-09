@@ -1,14 +1,14 @@
 package cars.value;
 
 public class StaticValue implements IValue{
-    private double value0;
+    private float value0;
 
-    public StaticValue(double value0) {
+    public StaticValue(float value0) {
         this.value0 = value0;
     }
 
     @Override
-    public double calculate(double t, double a, double h, double divisor) {
+    public float calculate(float h, float a, float t, float divisor) {
         return value0;
     }
 }

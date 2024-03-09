@@ -34,12 +34,12 @@ public class ResultLabel {
         posY = y+5;
         int cWidth = width/2-20;
         int cHeight = height-10;
-        engineParts = menu.gui().createComboBox(Parts.fromType(Type.ENGINE).VALUES, x, posY, cWidth, cHeight,5);
-        turboParts = menu.gui().createComboBox(Parts.fromType(Type.FORCED_INDUCTION).VALUES, x, posY+height, cWidth, cHeight,5);
-        transmissionParts = menu.gui().createComboBox(Parts.fromType(Type.TRANSMISSION).VALUES, x, posY+height*2, cWidth, cHeight,5);
-        suspensionParts = menu.gui().createComboBox(Parts.fromType(Type.SUSPENSION).VALUES, x, posY+height*3, cWidth, cHeight,5);
-        brakeParts = menu.gui().createComboBox(Parts.fromType(Type.BRAKES).VALUES, x, posY+height*4, cWidth, cHeight,5);
-        tireParts = menu.gui().createComboBox(Parts.fromType(Type.TIRES).VALUES, x, posY+height*5, cWidth, cHeight,5);
+        engineParts = menu.gui().createComboBox(PartsLoader.fromType(Type.ENGINE).VALUES, x, posY, cWidth, cHeight,10);
+        turboParts = menu.gui().createComboBox(PartsLoader.fromType(Type.FORCED_INDUCTION).VALUES, x, posY+height, cWidth, cHeight,10);
+        transmissionParts = menu.gui().createComboBox(PartsLoader.fromType(Type.TRANSMISSION).VALUES, x, posY+height*2, cWidth, cHeight,10);
+        suspensionParts = menu.gui().createComboBox(PartsLoader.fromType(Type.SUSPENSION).VALUES, x, posY+height*3, cWidth, cHeight,10);
+        brakeParts = menu.gui().createComboBox(PartsLoader.fromType(Type.BRAKES).VALUES, x, posY+height*4, cWidth, cHeight,10);
+        tireParts = menu.gui().createComboBox(PartsLoader.fromType(Type.TIRES).VALUES, x, posY+height*5, cWidth, cHeight,10);
         handleVisibility(menu);
     }
 

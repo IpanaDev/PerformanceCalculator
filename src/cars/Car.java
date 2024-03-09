@@ -1,128 +1,95 @@
 package cars;
 
-import cars.value.DynamicValue;
+import cars.value.AxlePairValue;
+import cars.value.FloatArrayValue;
+import cars.value.FloatValue;
 import cars.value.IValue;
-import cars.value.StaticValue;
+import config.ConfigFile;
+import vaultlib.core.types.EAReflection.Float;
+import vaultlib.core.types.attrib.RefSpec;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Car {
-    private int[] tStats, aStats, hStats;
-    private double[] cTStats, cAStats, cHStats;
+    private List<Float> tStats, aStats, hStats;
+    public FloatValue mass, coefficient, rpm, finalGear, torqueSplit;
+    public FloatArrayValue torque, gearRatio, gearEfficiency;
+    public AxlePairValue[] aspectRatio, rimSize, sectionWidth;
+    private float[] cTStats, cAStats, cHStats;
     private String vltName, fullName;
     private int nosLevel = -1;
-    public int[] RPM;
-    public int[] aspectRatio, sectionWidth, rimSize;
-    public double[] gearRatio, finalGear, torqueSplit;
-    public IValue RIM_SIZE, SECTION_WIDTH, ASPECT_RATIO, FINAL_DRIVE, cRPM;
-    public IValue[] GEAR_RATIO;
+    public IValue RIM_SIZE, SECTION_WIDTH, ASPECT_RATIO, FINAL_DRIVE, RPM, MASS, COEFFICIENT;
+    public IValue[] GEAR_RATIO, GEAR_EFFICIENCY, TORQUE;
     public int MAX_GEAR_INDEX;
 
-    public Car() {
-
+    public Car(String vltName, String fullName) {
+        this.vltName = vltName;
+        this.fullName = fullName;
+        this.mass = new FloatValue();
+        this.coefficient = new FloatValue();
+        this.rpm = new FloatValue();
+        this.finalGear = new FloatValue();
+        this.torqueSplit = new FloatValue();
+        this.torque = new FloatArrayValue(9);
+        this.gearRatio = new FloatArrayValue(9);
+        this.gearEfficiency = new FloatArrayValue(9);
+        this.aspectRatio = new AxlePairValue[4];
+        this.rimSize = new AxlePairValue[4];
+        this.sectionWidth = new AxlePairValue[4];
     }
 
     public void setupPreValues() {
-        cTStats = new double[tStats.length];
-        cAStats = new double[aStats.length];
-        cHStats = new double[hStats.length];
-        for (int i = 0; i < tStats.length; i++) {
-            cTStats[i] = tStats[tStats.length-1-i]*1.5-tStats[0]*0.5;
+        cTStats = new float[tStats.size()];
+        cAStats = new float[aStats.size()];
+        cHStats = new float[hStats.size()];
+        for (int i = 0; i < tStats.size(); i++) {
+            cTStats[i] = tStats.get(tStats.size()-1-i).GetValue()*1.5f-tStats.get(0).GetValue()*0.5f;
         }
-        for (int i = 0; i < aStats.length; i++) {
-            cAStats[i] = aStats[aStats.length-1-i]*1.5-aStats[0]*0.5;
+        for (int i = 0; i < aStats.size(); i++) {
+            cAStats[i] = aStats.get(aStats.size()-1-i).GetValue()*1.5f-aStats.get(0).GetValue()*0.5f;
         }
-        for (int i = 0; i < hStats.length; i++) {
-            cHStats[i] = hStats[hStats.length-1-i]*1.5-hStats[0]*0.5;
+        for (int i = 0; i < hStats.size(); i++) {
+            cHStats[i] = hStats.get(hStats.size()-1-i).GetValue()*1.5f-hStats.get(0).GetValue()*0.5f;
         }
-        cTStats[cTStats.length-1] = tStats[0]*150;
-        cAStats[cAStats.length-1] = aStats[0]*150;
-        cHStats[cHStats.length-1] = hStats[0]*150;
-        if (RPM.length > 1) {
-            double[] RPM_ARRAY = new double[4];
-            for (int i = 0; i < RPM_ARRAY.length - 1; i++) {
-                RPM_ARRAY[i] = 1.5 * RPM[i + 1] - 0.5 * RPM[0];
-            }
-            RPM_ARRAY[3] = RPM[0] * 150;
-            cRPM = new DynamicValue(RPM_ARRAY);
-        } else {
-            cRPM = new StaticValue(RPM[0]);
-        }
+        cTStats[cTStats.length-1] = tStats.get(0).GetValue()*150;
+        cAStats[cAStats.length-1] = aStats.get(0).GetValue()*150;
+        cHStats[cHStats.length-1] = hStats.get(0).GetValue()*150;
         int tireIndex = avgTorque() > 0 ? 0 : 1;
-        if (aspectRatio.length > 2) {
-            double[] ASPECT_RATIO_ARRAY = new double[4];
-            for (int i = 0; i < ASPECT_RATIO_ARRAY.length-1; i++) {
-                int arrayIndex = i*2 + 2 + tireIndex;
-                ASPECT_RATIO_ARRAY[i] = 1.5*aspectRatio[arrayIndex] - 0.5*aspectRatio[tireIndex];
-            }
-            ASPECT_RATIO_ARRAY[3] = 150*aspectRatio[tireIndex];
-            ASPECT_RATIO = new DynamicValue(ASPECT_RATIO_ARRAY);
-        } else {
-            ASPECT_RATIO = new StaticValue(aspectRatio[tireIndex]);
-        }
-        if (sectionWidth.length > 2) {
-            double[] SECTION_WIDTH_ARRAY = new double[4];
-            for (int i = 0; i < SECTION_WIDTH_ARRAY.length-1; i++) {
-                int arrayIndex = i*2 + 2 + tireIndex;
-                SECTION_WIDTH_ARRAY[i] = 1.5*sectionWidth[arrayIndex] - 0.5*sectionWidth[tireIndex];
-            }
-            SECTION_WIDTH_ARRAY[3] = 150*sectionWidth[tireIndex];
-            SECTION_WIDTH = new DynamicValue(SECTION_WIDTH_ARRAY);
-        } else {
-            SECTION_WIDTH = new StaticValue(sectionWidth[tireIndex]);
-        }
-        if (rimSize.length > 2) {
-            double[] RIM_SIZE_ARRAY = new double[4];
-            for (int i = 0; i < RIM_SIZE_ARRAY.length-1; i++) {
-                int arrayIndex = i*2 + 2 + tireIndex;
-                RIM_SIZE_ARRAY[i] = 1.5*rimSize[arrayIndex] - 0.5*rimSize[tireIndex];
-            }
-            RIM_SIZE_ARRAY[3] = 150*rimSize[tireIndex];
-            RIM_SIZE = new DynamicValue(RIM_SIZE_ARRAY);
-        } else {
-            RIM_SIZE = new StaticValue(rimSize[tireIndex]);
-        }
-        if (finalGear.length > 1) {
-            double[] FINAL_DRIVE_ARRAY = new double[4];
-            for (int i = 0; i < FINAL_DRIVE_ARRAY.length-1; i++) {
-                FINAL_DRIVE_ARRAY[i] = 1.5*finalGear[i+1] - 0.5*finalGear[0];
-            }
-            FINAL_DRIVE_ARRAY[3] = finalGear[0]*150;
-            FINAL_DRIVE = new DynamicValue(FINAL_DRIVE_ARRAY);
-        } else {
-            FINAL_DRIVE = new StaticValue(finalGear[0]);
-        }
-        if (gearRatio.length > 9) {
-            double[][] GEAR_RATIO_ARRAY = new double[9][4];
-            for (int i = 0; i < GEAR_RATIO_ARRAY.length; i++) {
-                for (int j = 0; j < 3; j++) {
-                    GEAR_RATIO_ARRAY[i][j] = gearRatio[(j+1)*9 + i]*1.5 - gearRatio[i]*0.5;
-                }
-            }
-            for (int i = 0; i < GEAR_RATIO_ARRAY.length; i++) {
-                GEAR_RATIO_ARRAY[i][3] = gearRatio[i]*150;
-            }
-            GEAR_RATIO = new DynamicValue[9];
-            for (int i = 0; i < GEAR_RATIO.length; i++) {
-                GEAR_RATIO[i] = new DynamicValue(GEAR_RATIO_ARRAY[i]);
-            }
-        } else {
-            GEAR_RATIO = new StaticValue[9];
-            for (int i = 0; i < GEAR_RATIO.length; i++) {
-                GEAR_RATIO[i] = new StaticValue(gearRatio[i]);
+        RPM = PreCalculations.preCalculations(rpm);
+        ASPECT_RATIO = PreCalculations.preCalculationsTire(tireIndex, aspectRatio);
+        SECTION_WIDTH = PreCalculations.preCalculationsTire(tireIndex, sectionWidth);
+        for (AxlePairValue axlePair : rimSize) {
+            if (axlePair != null) {
+                axlePair.Front *= 25.4f;
+                axlePair.Rear *= 25.4f;
             }
         }
+        RIM_SIZE = PreCalculations.preCalculationsTire(tireIndex, rimSize);
+        FINAL_DRIVE = PreCalculations.preCalculations(finalGear);
+        MASS = PreCalculations.preCalculations(mass);
+        COEFFICIENT = PreCalculations.preCalculations(coefficient);
+        GEAR_RATIO = PreCalculations.preCalculationsArray(gearRatio);
+        if (gearEfficiency != null) {
+            GEAR_EFFICIENCY = PreCalculations.preCalculationsArray(gearEfficiency);
+        }
+        for (int i = 0; i < torque.array.length; i++) {
+            torque.array[i] *= 1.3558f; //Converting to Nm
+        }
+        TORQUE = PreCalculations.preCalculationsArray(torque);
         int i = 8;
-        while (gearRatio[i] == 0) {
+        while (gearRatio.array[i] == 0) {
             i--;
         }
         MAX_GEAR_INDEX = i;
     }
 
-    private double avgTorque() {
-        double sum = 0;
-        for (double t : torqueSplit) {
+    private float avgTorque() {
+        float sum = 0;
+        for (float t : torqueSplit.array) {
             sum += t;
         }
-        return sum / torqueSplit.length;
+        return sum / torqueSplit.array.length;
     }
 
     public String fullName() {
@@ -131,9 +98,15 @@ public class Car {
 
     @Override
     public String toString() {
-        return fullName;
+        if (Boolean.parseBoolean(String.valueOf(ConfigFile.DEV_MODE.value()))) {
+            return fullName + " ["+vltName+"]";
+        } else {
+            return fullName;
+        }
     }
-
+    public void nosLevel(int level) {
+        nosLevel = level;
+    }
     public String nosLevel() {
         String s;
         switch (nosLevel) {
@@ -147,19 +120,28 @@ public class Car {
         return nosLevel + s;
     }
 
-    public double[] tStats() {
+    public String vltName() {
+        return vltName;
+    }
+
+    public void setTStats(List<Float> tStats) {
+        this.tStats = tStats;
+    }
+    public void setAStats(List<Float> aStats) {
+        this.aStats = aStats;
+    }
+    public void setHStats(List<Float> hStats) {
+        this.hStats = hStats;
+    }
+    public float[] tStats() {
         return cTStats;
     }
 
-    public double[] aStats() {
+    public float[] aStats() {
         return cAStats;
     }
 
-    public double[] hStats() {
+    public float[] hStats() {
         return cHStats;
-    }
-
-    public double[] gearRatio() {
-        return gearRatio;
     }
 }

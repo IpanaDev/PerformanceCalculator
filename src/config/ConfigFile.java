@@ -11,7 +11,7 @@ public class ConfigFile {
     public static final File CONFIG_FILE = new File("config.txt");
     private static final ArrayList<ConfigField> CONFIG_FIELDS = new ArrayList<>();
     public static final ConfigField GAME_LOCATION = new ConfigField("Game Location","");
-    public static final ConfigField USE_CACHE = new ConfigField("Use Cache",true);
+    public static final ConfigField DEV_MODE = new ConfigField("Dev Mode",false);
     public static final ConfigField COLOR = new ConfigField("UI Color","125,98,255");
     public static final ConfigField BUTTON_COLOR = new ConfigField("Button Color","50,50,50");
 
@@ -42,12 +42,21 @@ public class ConfigFile {
 
             String line;
             int lineCount = 0;
+            boolean needsUpdate = false;
             while ((line = reader.readLine()) != null) {
                 String[] split = line.split("=");
-                fieldFromName(split[0]).value = split[1];
+                ConfigField field = fieldFromName(split[0]);
+                if (field != null) {
+                    field.value = split[1];
+                } else {
+                    needsUpdate = true;
+                }
                 lineCount++;
             }
-            if (lineCount < CONFIG_FIELDS.size()) {
+            if (!needsUpdate && lineCount < CONFIG_FIELDS.size()) {
+                needsUpdate = true;
+            }
+            if (needsUpdate) {
                 Object[] values = new Object[CONFIG_FIELDS.size()];
                 for (int i = 0; i < CONFIG_FIELDS.size(); i++) {
                     values[i] = CONFIG_FIELDS.get(i).value;
@@ -60,6 +69,7 @@ public class ConfigFile {
     }
 
     public static void save(Object... values) throws IOException {
+        CONFIG_FILE.delete();
         CONFIG_FILE.createNewFile();
         Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(CONFIG_FILE.toPath()), StandardCharsets.UTF_8));
         for (int i = 0; i < values.length; i++) {

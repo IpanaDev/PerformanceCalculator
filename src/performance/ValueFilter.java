@@ -25,7 +25,7 @@ public enum ValueFilter {
     }
 
     public PerfPart[] from(Type type) throws NoSuchFieldException, IllegalAccessException {
-        Parts parts = Parts.fromType(type);
+        PartsLoader parts = PartsLoader.fromType(type);
         Field field = parts.getClass().getDeclaredField(this.name());
         return (PerfPart[]) field.get(parts);
     }

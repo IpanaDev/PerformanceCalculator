@@ -14,111 +14,59 @@ public class Hasher {
         return builder.toString();
     }
 
-    public static int HashVLT_MEMORY(String str) {
+    public static int HashVLT_MEMORY(String k) {
         int initVal = 0xABCDEF00;
-        int strOffset = 0;
-        int strLength = str.length();
-        int firstFactor = 0x9e3779b9;
-        int secondFactor = firstFactor;
-        int thirdFactor = initVal;
+        int koffs = 0;
+        int len = k.length();
+        int a = 0x9e3779b9;
+        int b = a;
+        int c = initVal;
 
-        while (strLength >= 12) {
-            firstFactor += str.charAt(strOffset) + (str.charAt(strOffset + 1) << 8) + (str.charAt(strOffset + 2) << 16) + (str.charAt(strOffset + 3) << 24);
-            secondFactor += str.charAt(strOffset + 4) + (str.charAt(strOffset + 5) << 8) + (str.charAt(strOffset + 6) << 16) + (str.charAt(strOffset + 7) << 24);
-            thirdFactor += str.charAt(strOffset + 8) + (str.charAt(strOffset + 9) << 8) + (str.charAt(strOffset + 10) << 16) + (str.charAt(strOffset + 11) << 24);
+        while (len >= 12) {
+            a += k.charAt(koffs)     + (k.charAt(koffs + 1) << 8) + (k.charAt(koffs + 2) << 16)  + (k.charAt(koffs + 3) << 24);
+            b += k.charAt(koffs + 4) + (k.charAt(koffs + 5) << 8) + (k.charAt(koffs + 6) << 16)  + (k.charAt(koffs + 7) << 24);
+            c += k.charAt(koffs + 8) + (k.charAt(koffs + 9) << 8) + (k.charAt(koffs + 10) << 16) + (k.charAt(koffs + 11) << 24);
 
-            firstFactor -= secondFactor;
-            firstFactor -= thirdFactor;
-            firstFactor ^= thirdFactor >>> 13;
+            a -= b; a -= c; a ^= c >>> 13;
+            b -= c; b -= a; b ^= a << 8;
+            c -= a; c -= b; c ^= b >>> 13;
+            a -= b; a -= c; a ^= c >>> 12;
+            b -= c; b -= a; b ^= a << 16;
+            c -= a; c -= b; c ^= b >>> 5;
+            a -= b; a -= c; a ^= c >>> 3;
+            b -= c; b -= a; b ^= a << 10;
+            c -= a; c -= b; c ^= b >>> 15;
 
-            secondFactor -= thirdFactor;
-            secondFactor -= firstFactor;
-            secondFactor ^= firstFactor << 8;
-
-            thirdFactor -= firstFactor;
-            thirdFactor -= secondFactor;
-            thirdFactor ^= secondFactor >>> 13;
-
-            firstFactor -= secondFactor;
-            firstFactor -= thirdFactor;
-            firstFactor ^= thirdFactor >>> 12;
-
-            secondFactor -= thirdFactor;
-            secondFactor -= firstFactor;
-            secondFactor ^= firstFactor << 16;
-
-            thirdFactor -= firstFactor;
-            thirdFactor -= secondFactor;
-            thirdFactor ^= secondFactor >>> 5;
-
-            firstFactor -= secondFactor;
-            firstFactor -= thirdFactor;
-            firstFactor ^= thirdFactor >>> 3;
-
-            secondFactor -= thirdFactor;
-            secondFactor -= firstFactor;
-            secondFactor ^= firstFactor << 10;
-
-            thirdFactor -= firstFactor;
-            thirdFactor -= secondFactor;
-            thirdFactor ^= secondFactor >>> 15;
-
-            strOffset += 12;
-            strLength -= 12;
+            koffs += 12;
+            len -= 12;
         }
 
-        thirdFactor += str.length();
+        c += k.length();
 
-        switch (strLength) {
-            case 11: thirdFactor += str.charAt(10 + strOffset) << 24;
-            case 10: thirdFactor += str.charAt(9 + strOffset) << 16;
-            case 9: thirdFactor += str.charAt(8 + strOffset) << 8;
-            case 8: secondFactor += str.charAt(7 + strOffset) << 24;
-            case 7: secondFactor += str.charAt(6 + strOffset) << 16;
-            case 6: secondFactor += str.charAt(5 + strOffset) << 8;
-            case 5: secondFactor += str.charAt(4 + strOffset);
-            case 4: firstFactor += str.charAt(3 + strOffset) << 24;
-            case 3: firstFactor += str.charAt(2 + strOffset) << 16;
-            case 2: firstFactor += str.charAt(1 + strOffset) << 8;
-            case 1: firstFactor += str.charAt(strOffset); break;
+        switch (len) {
+            case 11: c += k.charAt(10 + koffs) << 24;
+            case 10: c += k.charAt(9 + koffs) << 16;
+            case 9: c += k.charAt(8 + koffs) << 8;
+            case 8: b += k.charAt(7 + koffs) << 24;
+            case 7: b += k.charAt(6 + koffs) << 16;
+            case 6: b += k.charAt(5 + koffs) << 8;
+            case 5: b += k.charAt(4 + koffs);
+            case 4: a += k.charAt(3 + koffs) << 24;
+            case 3: a += k.charAt(2 + koffs) << 16;
+            case 2: a += k.charAt(1 + koffs) << 8;
+            case 1: a += k.charAt(koffs); break;
         }
 
-        firstFactor -= secondFactor;
-        firstFactor -= thirdFactor;
-        firstFactor ^= thirdFactor >>> 13;
+        a -= b; a -= c; a ^= c >>> 13;
+        b -= c; b -= a; b ^= a << 8;
+        c -= a; c -= b; c ^= b >>> 13;
+        a -= b; a -= c; a ^= c >>> 12;
+        b -= c; b -= a; b ^= a << 16;
+        c -= a; c -= b; c ^= b >>> 5;
+        a -= b; a -= c; a ^= c >>> 3;
+        b -= c; b -= a; b ^= a << 10;
+        c -= a; c -= b; c ^= b >>> 15;
 
-        secondFactor -= thirdFactor;
-        secondFactor -= firstFactor;
-        secondFactor ^= firstFactor << 8;
-
-        thirdFactor -= firstFactor;
-        thirdFactor -= secondFactor;
-        thirdFactor ^= secondFactor >>> 13;
-
-        firstFactor -= secondFactor;
-        firstFactor -= thirdFactor;
-        firstFactor ^= thirdFactor >>> 12;
-
-        secondFactor -= thirdFactor;
-        secondFactor -= firstFactor;
-        secondFactor ^= firstFactor << 16;
-
-        thirdFactor -= firstFactor;
-        thirdFactor -= secondFactor;
-        thirdFactor ^= secondFactor >>> 5;
-
-        firstFactor -= secondFactor;
-        firstFactor -= thirdFactor;
-        firstFactor ^= thirdFactor >>> 3;
-
-        secondFactor -= thirdFactor;
-        secondFactor -= firstFactor;
-        secondFactor ^= firstFactor << 10;
-
-        thirdFactor -= firstFactor;
-        thirdFactor -= secondFactor;
-        thirdFactor ^= secondFactor >>> 15;
-
-        return thirdFactor;
+        return c;
     }
 }

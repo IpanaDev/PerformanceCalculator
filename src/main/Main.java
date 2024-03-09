@@ -1,38 +1,41 @@
 package main;
 
 import config.ConfigFile;
-import decompiler.AttributeDecompiler;
-import cars.Cars;
-import decompiler.LangDecompiler;
-import decompiler.PartDecompiler;
-import performance.Parts;
+import cars.CarLoader;
+import init.VaultInit;
+import performance.PartsLoader;
 import ui.UI;
+import utils.Benchmark;
+import vaultlib.GameIdHelper;
+import vaultlib.core.db.Database;
+import vaultlib.core.db.DatabaseOptions;
+import vaultlib.core.db.DatabaseType;
+import vaultlib.support.world.WorldProfile;
 
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 public class Main {
+    public static Database DB;
     
-    public static void main(String[] args) throws IllegalAccessException, IOException, InterruptedException, NoSuchFieldException {
-        File cars = new File("cars.txt");
-        File parts = new File("parts");
+    public static void main(String[] args) throws Exception {
         UI.init();
-        ConfigFile.init();
-        UI.INSTANCE.decompilerMenu().init();
-        if (!cars.exists()) {
-            LangDecompiler.start();
-            AttributeDecompiler.start(parts, cars);
-        }
-        if (!parts.exists()) {
-            PartDecompiler.start(parts);
-        }
-        UI.INSTANCE.decompilerMenu().setStatus("Loading...");
-        Parts.init();
-        Cars.init();
+        UI.INSTANCE.statusMenu().init();
+        UI.INSTANCE.statusMenu().setStatus("Loading...");
+        Benchmark.create("Initialize Config", ConfigFile::init);
+        Benchmark.create("Initialize VLT", () -> {
+            VaultInit.init();
+            File gameDir = new File(String.valueOf(ConfigFile.GAME_LOCATION.value()));
+            File data = new File(gameDir, ".data\\b2d5f170c62d6e37ac67c04be2235249");
+            String gameId = GameIdHelper.WORLD.name();
+            DB = new Database(new DatabaseOptions(gameId, DatabaseType.X86Database));
+            String directory = data.getAbsolutePath() + "\\GLOBAL";
+            WorldProfile profile = new WorldProfile();
+            profile.LoadFiles(DB, directory, "attributes.bin", "commerce.bin");
+            DB.CompleteLoad();
+        });
+        Benchmark.create("Initialize Parts", PartsLoader::init);
+        Benchmark.create("Initialize Cars", CarLoader::init);
         System.gc();
         UI.INSTANCE.performanceMenu().init();
-
     }
 }

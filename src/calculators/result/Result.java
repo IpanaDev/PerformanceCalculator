@@ -12,12 +12,12 @@ public class Result {
     private volatile PerfPart suspension = PerfPart.EMPTY_SUSPENSION;
     private volatile PerfPart brakes = PerfPart.EMPTY_BRAKES;
     private volatile PerfPart tires = PerfPart.EMPTY_TIRES;
-    private volatile double topSpeed, acceleration, handling, realTopSpeed;
+    private volatile float tStat, aStat, hStat, speedKMH, acceleration;
     private volatile int tGain, aGain, hGain;
     private volatile int rating;
     private volatile long time;
 
-    public void set(PerfPart engine, PerfPart turbo, PerfPart trans, PerfPart suspension, PerfPart brakes, PerfPart tires, int tGain, int aGain, int hGain, double realTopSpeed, double topSpeed, double acceleration, double handling, int rating) {
+    public void set(PerfPart engine, PerfPart turbo, PerfPart trans, PerfPart suspension, PerfPart brakes, PerfPart tires, int tGain, int aGain, int hGain, float additionalValue, float topSpeed, float acceleration, float handling, int rating) {
         this.engine = engine;
         this.turbo = turbo;
         this.trans = trans;
@@ -27,10 +27,11 @@ public class Result {
         this.tGain = tGain;
         this.aGain = aGain;
         this.hGain = hGain;
-        this.realTopSpeed = realTopSpeed;
-        this.topSpeed = topSpeed;
-        this.acceleration = acceleration;
-        this.handling = handling;
+        this.acceleration = additionalValue;
+        this.speedKMH = additionalValue;
+        this.tStat = topSpeed;
+        this.aStat = acceleration;
+        this.hStat = handling;
         this.rating = rating;
     }
 
@@ -43,9 +44,9 @@ public class Result {
         sb.append(", suspension=").append(suspension);
         sb.append(", brakes=").append(brakes);
         sb.append(", tires=").append(tires);
-        sb.append(", topSpeed=").append(topSpeed);
-        sb.append(", acceleration=").append(acceleration);
-        sb.append(", handling=").append(handling);
+        sb.append(", topSpeed=").append(tStat);
+        sb.append(", acceleration=").append(aStat);
+        sb.append(", handling=").append(hStat);
         sb.append(", rating=").append(rating);
         sb.append('}');
         return sb.toString();
@@ -83,20 +84,24 @@ public class Result {
         return tires;
     }
 
-    public double topSpeed() {
-        return topSpeed;
+    public float tStat() {
+        return tStat;
     }
 
-    public double acceleration() {
+    public float aStat() {
+        return aStat;
+    }
+
+    public float hStat() {
+        return hStat;
+    }
+
+    public float acceleration() {
         return acceleration;
     }
 
-    public double handling() {
-        return handling;
-    }
-
-    public double realTopSpeed() {
-        return realTopSpeed;
+    public float realTopSpeed() {
+        return speedKMH;
     }
 
     public int tGain() {
