@@ -8,6 +8,7 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.io.IOException;
 
+import static config.ConfigFile.GAME_LOCATION;
 import static ui.UI.*;
 
 public class ConfigMenu extends Menu {
@@ -29,7 +30,7 @@ public class ConfigMenu extends Menu {
             int response = jFileChooser.showOpenDialog(null);
             if (response == JFileChooser.APPROVE_OPTION) {
                 try {
-                    ConfigFile.save(jFileChooser.getSelectedFile().getParentFile().getAbsolutePath(), true);
+                    ConfigFile.save(GAME_LOCATION, jFileChooser.getSelectedFile().getParentFile().getAbsolutePath());
                     if (ConfigFile.invalidGameFolder()) {
                         ((TitledBorder)button.getBorder()).setTitle("Selected folder doesn't have WUGG");
                         gui().getContentPane().repaint();

@@ -33,7 +33,7 @@ public class UI extends JFrame {
         System.setProperty("sun.java2d.d3d", "false");
         System.setProperty("sun.java2d.ddoffscreen", "false");
         System.setProperty("sun.java2d.noddraw", "true");
-        this.setTitle("WUGG Performance Calculator");
+        this.setTitle("WUGG Performance Calculator "+Main.BUILD);
         ImageIcon imageIcon = new ImageIcon(Main.class.getResource("logo.png"));
         this.setIconImage(imageIcon.getImage());
         this.setLayout(null);

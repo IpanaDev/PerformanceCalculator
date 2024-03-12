@@ -19,7 +19,7 @@ public class ConfigFile {
         load();
         UI.onConfigLoad();
         if (!CONFIG_FILE.exists() || invalidGameFolder()) {
-            save("C:\\", true);
+            save(GAME_LOCATION, "C:\\");
             UI.INSTANCE.configMenu().init();
         }
         while (invalidGameFolder()) {
@@ -57,27 +57,26 @@ public class ConfigFile {
                 needsUpdate = true;
             }
             if (needsUpdate) {
-                Object[] values = new Object[CONFIG_FIELDS.size()];
-                for (int i = 0; i < CONFIG_FIELDS.size(); i++) {
-                    values[i] = CONFIG_FIELDS.get(i).value;
-                }
-                save(values);
+                save();
             }
             reader.close();
             fileReader.close();
         }
     }
-
-    public static void save(Object... values) throws IOException {
+    public static void save() throws IOException {
         CONFIG_FILE.delete();
         CONFIG_FILE.createNewFile();
         Writer writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(CONFIG_FILE.toPath()), StandardCharsets.UTF_8));
-        for (int i = 0; i < values.length; i++) {
-            ConfigField field = CONFIG_FIELDS.get(i);
-            field.value = values[i];
-            writer.write(field.name+"="+field.value+"\n");
+        for (ConfigField field : CONFIG_FIELDS) {
+            writer.write(field.name + "=" + field.value + "\n");
         }
         writer.close();
+    }
+    public static void save(ConfigField configField, Object value) throws IOException {
+        if (configField != null) {
+            configField.value = value;
+        }
+        save();
     }
 
     public static Object valueFromName(String name) {
