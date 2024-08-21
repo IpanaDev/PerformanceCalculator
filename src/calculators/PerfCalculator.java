@@ -11,6 +11,7 @@ import calculators.search.TopSpeedSearch;
 import cars.Car;
 import cars.Overall;
 import performance.*;
+import ui.UI;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -64,80 +65,7 @@ public class PerfCalculator {
         //System.out.println(result);
         return result;
     }
-    public Result findSingleThread(Car car, Overall overall, ValueFilter valueFilter, Priority priority) throws IllegalAccessException, NoSuchFieldException {
-        System.currentTimeMillis();
-        long ms = System.currentTimeMillis();
-        this.tValue0 = car.tStats()[0];
-        this.tValue1 = car.tStats()[1];
-        this.tValue2 = car.tStats()[2];
-        this.tValue3 = car.tStats()[3];
 
-        this.aValue0 = car.aStats()[0];
-        this.aValue1 = car.aStats()[1];
-        this.aValue2 = car.aStats()[2];
-        this.aValue3 = car.aStats()[3];
-
-        this.hValue0 = car.hStats()[0];
-        this.hValue1 = car.hStats()[1];
-        this.hValue2 = car.hStats()[2];
-        this.hValue3 = car.hStats()[3];
-        this.overall = overall;
-        PreChecks preChecks = new PreChecks(this);
-        SumCheck brakeSum = preChecks.brakeSum();
-        final Result result = new Result();
-        PerfPart[] engineParts = valueFilter.from(Type.ENGINE);
-        PerfPart[] turboParts = valueFilter.from(Type.FORCED_INDUCTION);
-        PerfPart[] transParts = valueFilter.from(Type.TRANSMISSION);
-        PerfPart[] suspensionParts = valueFilter.from(Type.SUSPENSION);
-        PerfPart[] brakeParts = valueFilter.from(Type.BRAKES);
-        PerfPart[] tireParts = valueFilter.from(Type.TIRES);
-        ISearch iSearch;
-        switch (priority) {
-            case TOP_SPEED_KMH: iSearch = new TopSpeedSearch(); break;
-            case ACCEL: iSearch = new AccelerationSearch(); break;
-            default: iSearch = new DefaultSearch(); break;
-        }
-        for (PerfPart engine : engineParts) {
-            if (preChecks.check(engine, preChecks.engineSum)) {
-                continue;
-            }
-            for (PerfPart turbo : turboParts) {
-                if (preChecks.check(turbo, preChecks.turboSum)) {
-                    continue;
-                }
-                for (PerfPart trans : transParts) {
-                    if (preChecks.check(trans, preChecks.transSum)) {
-                        continue;
-                    }
-                    for (PerfPart suspension : suspensionParts) {
-                        if (preChecks.check(suspension, preChecks.suspensionSum)) {
-                            continue;
-                        }
-                        for (PerfPart brakes : brakeParts) {
-                            if (preChecks.check(brakes, preChecks.brakeSum)) {
-                                continue;
-                            }
-                            for (PerfPart tires : tireParts) {
-                                int tGain = brakeSum.t() + tires.tGain();
-                                int aGain = brakeSum.a() + tires.aGain();
-                                int hGain = brakeSum.h() + tires.hGain();
-                                int divisor = 150 + tGain + aGain + hGain;
-                                float tStat = (tGain * tValue0 + aGain * tValue1 + hGain * tValue2 + tValue3) / divisor;
-                                float aStat = (tGain * aValue0 + aGain * aValue1 + hGain * aValue2 + aValue3) / divisor;
-                                float hStat = (tGain * hValue0 + aGain * hValue1 + hGain * hValue2 + hValue3) / divisor;
-                                int overallStat = ((int) tStat + (int) aStat + (int) hStat) / 3;
-                                if (overallStat >= overall.min() && overallStat <= overall.max()) {
-                                    priority.handle(result, tGain, aGain, hGain, iSearch.additionalValue(car, tGain, aGain, hGain), tStat, aStat, hStat, overallStat, engine, turbo, trans, suspension, brakes, tires);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        result.setTime(System.currentTimeMillis() - ms);
-        return result;
-    }
     public Result findMultiThread(Car car, Overall overall, ValueFilter valueFilter, Priority priority) throws IllegalAccessException, NoSuchFieldException {
         System.currentTimeMillis();
         long ms = System.currentTimeMillis();
@@ -204,7 +132,7 @@ public class PerfCalculator {
                                     float aStat = (tGain * aValue0 + aGain * aValue1 + hGain * aValue2 + aValue3) / divisor;
                                     float hStat = (tGain * hValue0 + aGain * hValue1 + hGain * hValue2 + hValue3) / divisor;
                                     int overallStat = ((int) tStat + (int) aStat + (int) hStat) / 3;
-                                    if (overallStat >= overall.min() && overallStat <= overall.max()) {
+                                    if (overallStat >= overall.min() && overallStat <= overall.max() && (!UI.INSTANCE.performanceMenu().limitByBudget.isSelected() || Result.cost(engine, turbo, trans, suspension, brakes, tires) <= UI.INSTANCE.performanceMenu().budget)) {
                                         priority.handle(result, tGain, aGain, hGain, iSearch.additionalValue(car, tGain, aGain, hGain), tStat, aStat, hStat, overallStat, engine, turbo, trans, suspension, brakes, tires);
                                     }
                                 }

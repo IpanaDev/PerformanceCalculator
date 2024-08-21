@@ -1,6 +1,9 @@
 package ui.elements.label;
 
+import calculators.result.Result;
+import cars.Car;
 import performance.*;
+import ui.SearchOptions;
 import ui.UI;
 import ui.menu.impl.PerformanceMenu;
 
@@ -8,6 +11,9 @@ import javax.swing.*;
 import java.util.ArrayList;
 
 public class ResultLabel {
+    public Car car;
+    public Result result;
+    public SearchOptions searchOptions;
     public ArrayList<JLabel> labels;
     public JComboBox<PerfPart> engineParts;
     public JComboBox<PerfPart> turboParts;
@@ -58,5 +64,17 @@ public class ResultLabel {
         suspensionParts.setVisible(customParts);
         brakeParts.setVisible(customParts);
         tireParts.setVisible(customParts);
+    }
+
+    public void setCar(Car car) {
+        this.car = car;
+    }
+
+    public void setResult(Result result) {
+        this.result = result;
+    }
+
+    public void setSearchOptions(SearchOptions searchOptions) {
+        this.searchOptions = searchOptions;
     }
 }

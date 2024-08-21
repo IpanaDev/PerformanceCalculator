@@ -1,25 +1,25 @@
 package ui;
 
+import calculators.result.Result;
+import cars.Car;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import config.ConfigFile;
 import main.Main;
-import ui.menu.impl.ConfigMenu;
-import ui.menu.impl.StatusMenu;
-import ui.menu.impl.PerformanceMenu;
+import ui.elements.JGraphMenu;
+import ui.elements.label.ResultLabel;
+import utils.MathUtil;
+import utils.Pair;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-public class UI extends JFrame {
+public class GraphUI extends JFrame {
     public static Color MAIN_COLOR;
     public static Color BUTTON_COLOR;
     public static Border BUTTON_BORDER;
-    private PerformanceMenu performanceMenu = new PerformanceMenu(this);
-    private ConfigMenu configMenu = new ConfigMenu(this);
-    private StatusMenu statusMenu = new StatusMenu(this);
-    public static UI INSTANCE;
+    public static GraphUI INSTANCE;
 
     static {
         String[] main = String.valueOf(ConfigFile.COLOR.value()).split(",");
@@ -29,43 +29,52 @@ public class UI extends JFrame {
         BUTTON_BORDER = BorderFactory.createLineBorder(MAIN_COLOR, 1, false);
     }
 
-    public UI() throws IllegalAccessException {
+    public GraphUI() {
         System.setProperty("sun.java2d.d3d", "false");
         System.setProperty("sun.java2d.ddoffscreen", "false");
         System.setProperty("sun.java2d.noddraw", "true");
-        this.setTitle("WUGG Performance Calculator "+Main.BUILD);
         ImageIcon imageIcon = new ImageIcon(Main.class.getResource("logo.png"));
         this.setIconImage(imageIcon.getImage());
         this.setLayout(null);
         this.setResizable(false);
         this.setSize(930, 600);
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);// this also destroys current program
+        this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);// this also destroys current program
+    }
+
+    public void setupButtons(ResultLabel resultLabel) {
+        int y = 2;
+        int yOff = 20;
+        createLabel("Search Options:", 2, y+=yOff, 100, 20);
+        createLabel(resultLabel.searchOptions.overall.fullName(), 2, y+=yOff, 150, 20);
+        createLabel(resultLabel.searchOptions.valueFilter.fullName(), 2, y+=yOff, 150, 20);
+        createLabel(resultLabel.searchOptions.priority.fullName(), 2, y+=yOff, 150, 20); y+=yOff;
+
+        createLabel("Tune:", 2, y+=yOff, 100, 20);
+        createLabel(resultLabel.result.engine().name(), 2, y+=yOff, 150, 20);
+        createLabel(resultLabel.result.turbo().name(), 2, y+=yOff, 150, 20);
+        createLabel(resultLabel.result.trans().name(), 2, y+=yOff, 150, 20);
+        createLabel(resultLabel.result.suspension().name(), 2, y+=yOff, 150, 20);
+        createLabel(resultLabel.result.brakes().name(), 2, y+=yOff, 150, 20);
+        createLabel(resultLabel.result.tires().name(), 2, y+=yOff, 150, 20);
+
+        this.createGraphMenu(resultLabel);
+        this.setTitle("Detailed Graph: "+resultLabel.car.fullName());
         this.setVisible(true);
     }
 
-    public static void init() throws IllegalAccessException {
+
+
+    public static void init(ResultLabel resultLabel) throws IllegalAccessException {
         FlatMacDarkLaf.setup();
-        INSTANCE = new UI();
+        INSTANCE = new GraphUI();
+        INSTANCE.setupButtons(resultLabel);
     }
 
-    public static void onConfigLoad() {
-        String[] main = String.valueOf(ConfigFile.COLOR.value()).split(",");
-        String[] button = String.valueOf(ConfigFile.BUTTON_COLOR.value()).split(",");
-        MAIN_COLOR = new Color(Integer.parseInt(main[0]), Integer.parseInt(main[1]), Integer.parseInt(main[2]));
-        BUTTON_COLOR = new Color(Integer.parseInt(button[0]), Integer.parseInt(button[1]), Integer.parseInt(button[2]));
-        BUTTON_BORDER = BorderFactory.createLineBorder(MAIN_COLOR, 1, false);
-    }
-
-    public PerformanceMenu performanceMenu() {
-        return performanceMenu;
-    }
-
-    public ConfigMenu configMenu() {
-        return configMenu;
-    }
-
-    public StatusMenu statusMenu() {
-        return statusMenu;
+    public JPanel createGraphMenu(ResultLabel resultLabel) {
+        JGraphMenu jGraphMenu = new JGraphMenu(resultLabel);
+        jGraphMenu.setBounds(0,0,this.getWidth(),this.getHeight());
+        this.add(jGraphMenu);
+        return jGraphMenu;
     }
 
     public JTextField createTextField(String text, int x, int y, int width, int height) {

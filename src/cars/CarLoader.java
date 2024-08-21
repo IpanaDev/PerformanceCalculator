@@ -5,14 +5,11 @@ import config.ConfigFile;
 import lang.LangUnpacker;
 import lang.LanguagePackJson;
 import main.Main;
-import utils.Benchmark;
-import utils.Pair;
 import vaultlib.core.data.VltClass;
 import vaultlib.core.data.VltCollection;
 import vaultlib.core.db.Database;
 import vaultlib.core.types.EAReflection.Float;
 import vaultlib.core.types.VLTArrayType;
-import vaultlib.core.types.VLTBaseType;
 import vaultlib.core.types.attrib.RefSpec;
 import vaultlib.frameworks.AxlePair;
 
@@ -22,10 +19,11 @@ import java.util.*;
 
 public class CarLoader {
     public static final ArrayList<Car> CARS = new ArrayList<>();
-    private static final List<CarSpecKey> CHASSIS_KEYS = new ArrayList<>();
-    private static final List<CarSpecKey> ENGINE_KEYS = new ArrayList<>();
-    private static final List<CarSpecKey> TIRES_KEYS = new ArrayList<>();
-    private static final List<CarSpecKey> TRANSMISSION_KEYS = new ArrayList<>();
+    private static final HashMap<String, List<CarSpecKey>> CHASSIS_KEYS = new HashMap<>();
+    private static final HashMap<String, List<CarSpecKey>> ENGINE_KEYS = new HashMap<>();
+    private static final HashMap<String, List<CarSpecKey>> TIRES_KEYS = new HashMap<>();
+    private static final HashMap<String, List<CarSpecKey>> TRANSMISSION_KEYS = new HashMap<>();
+
     public static void init() throws Exception {
         File gameDir = new File(String.valueOf(ConfigFile.GAME_LOCATION.value()));
         File data = new File(gameDir, ".data\\b2d5f170c62d6e37ac67c04be2235249");
@@ -45,55 +43,63 @@ public class CarLoader {
             car.setupPreValues();
         }
         CARS.sort(Comparator.comparing(Car::fullName));
+
+        CHASSIS_KEYS.clear();
+        ENGINE_KEYS.clear();
+        TIRES_KEYS.clear();
+        TRANSMISSION_KEYS.clear();
     }
+
     private static void readTransmission(Database database, VltClass vltClass) {
         List<VltCollection> collections = database.rowManager.EnumerateCollections(vltClass.Name);
         for (VltCollection collection : collections) {
-            for (int i = 0; i < TRANSMISSION_KEYS.size(); i++) {
-                CarSpecKey carSpecKey = TRANSMISSION_KEYS.get(i);
-                if (carSpecKey.refSpec.CollectionKey().equals(collection.Name)) {
-                    Float FINAL_GEAR = collection.GetExactValue("FINAL_GEAR");
-                    Float TORQUE_SPLIT = collection.GetExactValue("TORQUE_SPLIT");
-                    VLTArrayType<Float> GEAR_RATIO = collection.GetExactValue("GEAR_RATIO");
-                    VLTArrayType<Float> GEAR_EFFICIENCY = collection.GetExactValue("GEAR_EFFICIENCY");
-                    carSpecKey.car.finalGear.put(carSpecKey.index, FINAL_GEAR.GetValue());
-                    carSpecKey.car.torqueSplit.put(carSpecKey.index, TORQUE_SPLIT.GetValue());
-                    carSpecKey.car.gearRatio.put(carSpecKey.index, GEAR_RATIO.Items);
-                    carSpecKey.car.gearEfficiency.put(carSpecKey.index, GEAR_EFFICIENCY.Items);
-                    TRANSMISSION_KEYS.remove(i--);
-                }
+            List<CarSpecKey> keys = TRANSMISSION_KEYS.get(collection.Name);
+            if (keys == null)
+                continue;
+
+            for (CarSpecKey carSpecKey : keys) {
+                Float FINAL_GEAR = collection.GetExactValue("FINAL_GEAR");
+                Float TORQUE_SPLIT = collection.GetExactValue("TORQUE_SPLIT");
+                VLTArrayType<Float> GEAR_RATIO = collection.GetExactValue("GEAR_RATIO");
+                VLTArrayType<Float> GEAR_EFFICIENCY = collection.GetExactValue("GEAR_EFFICIENCY");
+                carSpecKey.car.finalGear.put(carSpecKey.index, FINAL_GEAR.GetValue());
+                carSpecKey.car.torqueSplit.put(carSpecKey.index, TORQUE_SPLIT.GetValue());
+                carSpecKey.car.gearRatio.put(carSpecKey.index, GEAR_RATIO.Items);
+                carSpecKey.car.gearEfficiency.put(carSpecKey.index, GEAR_EFFICIENCY.Items);
             }
         }
     }
+
     private static void readTires(Database database, VltClass vltClass) {
         List<VltCollection> collections = database.rowManager.EnumerateCollections(vltClass.Name);
         for (VltCollection collection : collections) {
-            for (int i = 0; i < TIRES_KEYS.size(); i++) {
-                CarSpecKey carSpecKey = TIRES_KEYS.get(i);
-                if (carSpecKey.refSpec.CollectionKey().equals(collection.Name)) {
-                    AxlePair ASPECT_RATIO = collection.GetExactValue("ASPECT_RATIO");
-                    AxlePair SECTION_WIDTH = collection.GetExactValue("SECTION_WIDTH");
-                    AxlePair RIM_SIZE = collection.GetExactValue("RIM_SIZE");
-                    carSpecKey.car.aspectRatio[carSpecKey.index] = new AxlePairValue(ASPECT_RATIO);
-                    carSpecKey.car.sectionWidth[carSpecKey.index] = new AxlePairValue(SECTION_WIDTH);
-                    carSpecKey.car.rimSize[carSpecKey.index] = new AxlePairValue(RIM_SIZE);
-                    TIRES_KEYS.remove(i--);
-                }
+            List<CarSpecKey> keys = TIRES_KEYS.get(collection.Name);
+            if (keys == null)
+                continue;
+
+            for (CarSpecKey carSpecKey : keys) {
+                AxlePair ASPECT_RATIO = collection.GetExactValue("ASPECT_RATIO");
+                AxlePair SECTION_WIDTH = collection.GetExactValue("SECTION_WIDTH");
+                AxlePair RIM_SIZE = collection.GetExactValue("RIM_SIZE");
+                carSpecKey.car.aspectRatio[carSpecKey.index] = new AxlePairValue(ASPECT_RATIO);
+                carSpecKey.car.sectionWidth[carSpecKey.index] = new AxlePairValue(SECTION_WIDTH);
+                carSpecKey.car.rimSize[carSpecKey.index] = new AxlePairValue(RIM_SIZE);
             }
         }
     }
+
     private static void readEngine(Database database, VltClass vltClass) {
         List<VltCollection> collections = database.rowManager.EnumerateCollections(vltClass.Name);
         for (VltCollection collection : collections) {
-            for (int i = 0; i < ENGINE_KEYS.size(); i++) {
-                CarSpecKey carSpecKey = ENGINE_KEYS.get(i);
-                if (carSpecKey.refSpec.CollectionKey().equals(collection.Name)) {
-                    Float RED_LINE = collection.GetExactValue("RED_LINE");
-                    VLTArrayType<Float> TORQUE = collection.GetExactValue("TORQUE");
-                    carSpecKey.car.rpm.put(carSpecKey.index, RED_LINE.GetValue());
-                    carSpecKey.car.torque.put(carSpecKey.index, TORQUE.Items);
-                    ENGINE_KEYS.remove(i--);
-                }
+            List<CarSpecKey> keys = ENGINE_KEYS.get(collection.Name);
+            if (keys == null)
+                continue;
+
+            for (CarSpecKey carSpecKey : keys) {
+                Float RED_LINE = collection.GetExactValue("RED_LINE");
+                VLTArrayType<Float> TORQUE = collection.GetExactValue("TORQUE");
+                carSpecKey.car.rpm.put(carSpecKey.index, RED_LINE.GetValue());
+                carSpecKey.car.torque.put(carSpecKey.index, TORQUE.Items);
             }
         }
     }
@@ -101,15 +107,15 @@ public class CarLoader {
     private static void readChassis(Database database, VltClass vltClass) {
         List<VltCollection> collections = database.rowManager.EnumerateCollections(vltClass.Name);
         for (VltCollection collection : collections) {
-            for (int i = 0; i < CHASSIS_KEYS.size(); i++) {
-                CarSpecKey carSpecKey = CHASSIS_KEYS.get(i);
-                if (carSpecKey.refSpec.CollectionKey().equals(collection.Name)) {
-                    Float MASS = collection.GetExactValue("MASS");
-                    Float DRAG_COEFFICIENT = collection.GetExactValue("DRAG_COEFFICIENT");
-                    carSpecKey.car.mass.put(carSpecKey.index, MASS.GetValue());
-                    carSpecKey.car.coefficient.put(carSpecKey.index, DRAG_COEFFICIENT.GetValue());
-                    CHASSIS_KEYS.remove(i--);
-                }
+            List<CarSpecKey> keys = CHASSIS_KEYS.get(collection.Name);
+            if (keys == null)
+                continue;
+
+            for (CarSpecKey carSpecKey : keys) {
+                Float MASS = collection.GetExactValue("MASS");
+                Float DRAG_COEFFICIENT = collection.GetExactValue("DRAG_COEFFICIENT");
+                carSpecKey.car.mass.put(carSpecKey.index, MASS.GetValue());
+                carSpecKey.car.coefficient.put(carSpecKey.index, DRAG_COEFFICIENT.GetValue());
             }
         }
     }
@@ -136,19 +142,20 @@ public class CarLoader {
                 car.setTStats(tStat.Items);
                 car.setAStats(aStat.Items);
                 car.setHStats(hStat.Items);
-                for (int i = 0; i < chassis.Items.size(); i++) {
-                    CHASSIS_KEYS.add(new CarSpecKey(chassis.Items.get(i), car, i));
-                }
-                for (int i = 0; i < engine.Items.size(); i++) {
-                    ENGINE_KEYS.add(new CarSpecKey(engine.Items.get(i), car, i));
-                }
-                for (int i = 0; i < tires.Items.size(); i++) {
-                    TIRES_KEYS.add(new CarSpecKey(tires.Items.get(i), car, i));
-                }
-                for (int i = 0; i < transmission.Items.size(); i++) {
-                    TRANSMISSION_KEYS.add(new CarSpecKey(transmission.Items.get(i), car, i));
-                }
+
+                fillKeys(CHASSIS_KEYS, chassis, car);
+                fillKeys(ENGINE_KEYS, engine, car);
+                fillKeys(TIRES_KEYS, tires, car);
+                fillKeys(TRANSMISSION_KEYS, transmission, car);
             }
+        }
+    }
+
+    private static void fillKeys(HashMap<String, List<CarSpecKey>> map, VLTArrayType<RefSpec> specs, Car car) {
+        for (int i = 0; i < specs.Items.size(); i++) {
+            CarSpecKey carSpecKey = new CarSpecKey(specs.Items.get(i), car, i);
+            List<CarSpecKey> list = map.computeIfAbsent(carSpecKey.refSpec.CollectionKey(), key -> new ArrayList<>());
+            list.add(carSpecKey);
         }
     }
 
@@ -169,6 +176,7 @@ public class CarLoader {
             }
         }
     }
+
     private static int toLevel(String nodeName) {
         switch (nodeName) {
             case "nos_top": return 4;
@@ -179,6 +187,7 @@ public class CarLoader {
         }
         return -1;
     }
+
     private static Car fromVltName(String vltName) {
         for (Car car : CARS) {
             if (car.vltName().equals(vltName)) {
@@ -187,6 +196,7 @@ public class CarLoader {
         }
         return null;
     }
+
     private static class CarSpecKey {
         private RefSpec refSpec;
         private Car car;

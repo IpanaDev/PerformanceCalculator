@@ -16,7 +16,7 @@ import javax.swing.*;
 import java.io.*;
 
 public class Main {
-    public static final String BUILD = "1.7.1";
+    public static final String BUILD = "1.7.2";
     public static Database DB;
     
     public static void main(String[] args) {
@@ -26,11 +26,11 @@ public class Main {
             UI.INSTANCE.statusMenu().init();
             UI.INSTANCE.statusMenu().setStatus("Loading...");
             Benchmark.create("Initialize VLT", () -> {
-                VaultInit.init();
-                File gameDir = new File(String.valueOf(ConfigFile.GAME_LOCATION.value()));
-                File data = new File(gameDir, ".data\\b2d5f170c62d6e37ac67c04be2235249");
                 String gameId = GameIdHelper.WORLD.name();
                 DB = new Database(new DatabaseOptions(gameId, DatabaseType.X86Database));
+                VaultInit.init(DB.Options.Type);
+                File gameDir = new File(String.valueOf(ConfigFile.GAME_LOCATION.value()));
+                File data = new File(gameDir, ".data\\b2d5f170c62d6e37ac67c04be2235249");
                 String directory = data.getAbsolutePath() + "\\GLOBAL";
                 WorldProfile profile = new WorldProfile();
                 profile.LoadFiles(DB, directory, "attributes.bin", "commerce.bin");
