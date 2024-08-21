@@ -16,7 +16,7 @@ import javax.swing.*;
 import java.io.*;
 
 public class Main {
-    public static final String BUILD = "1.7.2";
+    public static final String BUILD = "1.8";
     public static Database DB;
     
     public static void main(String[] args) {

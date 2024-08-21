@@ -104,6 +104,7 @@ public class JGraphMenu extends JPanel {
             g.drawOval(detailX - 2,detailY - 2, 5, 5);
 
             detailX = Math.min(detailX, 790);
+            detailY = Math.min(detailY, 519);
             g.setColor(GraphUI.MAIN_COLOR);
             g.drawRect(detailX, detailY + 20, 130, 20);
             g.setColor(GraphUI.BUTTON_COLOR);
