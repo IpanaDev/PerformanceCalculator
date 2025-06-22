@@ -7,6 +7,7 @@ import performance.PartsLoader;
 import ui.UI;
 import utils.Benchmark;
 import vaultlib.GameIdHelper;
+import vaultlib.LoaderType;
 import vaultlib.core.db.Database;
 import vaultlib.core.db.DatabaseOptions;
 import vaultlib.core.db.DatabaseType;
@@ -16,7 +17,7 @@ import javax.swing.*;
 import java.io.*;
 
 public class Main {
-    public static final String BUILD = "1.8";
+    public static final String BUILD = "1.9";
     public static Database DB;
     
     public static void main(String[] args) {
@@ -33,7 +34,7 @@ public class Main {
                 File data = new File(gameDir, ".data\\b2d5f170c62d6e37ac67c04be2235249");
                 String directory = data.getAbsolutePath() + "\\GLOBAL";
                 WorldProfile profile = new WorldProfile();
-                profile.LoadFiles(DB, directory, "attributes.bin", "commerce.bin");
+                profile.LoadFiles(DB, directory, LoaderType.MAIN, "attributes.bin", "commerce.bin");
                 DB.CompleteLoad();
             });
             Benchmark.create("Initialize Parts", PartsLoader::init);

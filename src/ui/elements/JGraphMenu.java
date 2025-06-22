@@ -164,10 +164,6 @@ public class JGraphMenu extends JPanel {
             finalNode.ENGINE_TORQUE = car.TORQUE[i].calculate(h, a, t, divisor);
             finalNode.GEAR_EFFICIENCY = car.GEAR_EFFICIENCY[i].calculate(h, a, t, divisor);
             finalNode.WHEEL_TORQUE = finalNode.ENGINE_TORQUE * finalNode.GEAR_RATIO * FINAL_DRIVE * finalNode.GEAR_EFFICIENCY;
-
-            if (car.GEAR_EFFICIENCY != null) {
-                finalNode.WHEEL_TORQUE *= car.GEAR_EFFICIENCY[car.MAX_GEAR_INDEX].calculate(h, a, t, divisor);
-            }
             finalNode.speedKMH = (RPM / finalNode.GEAR_RATIO / FINAL_DRIVE) * TyreCircumference * 0.00006f;
             finalNodes[i-2] = finalNode;
         }

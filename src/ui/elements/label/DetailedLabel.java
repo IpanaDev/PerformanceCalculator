@@ -71,9 +71,6 @@ public class DetailedLabel {
             float ENGINE_TORQUE = car.TORQUE[i].calculate(h, a, t, divisor);
             float GEAR_EFFICIENCY = car.GEAR_EFFICIENCY[i].calculate(h, a, t, divisor);
             float WHEEL_TORQUE = ENGINE_TORQUE * GEAR_RATIO * FINAL_DRIVE * GEAR_EFFICIENCY;
-            if (car.GEAR_EFFICIENCY != null) {
-                WHEEL_TORQUE *= car.GEAR_EFFICIENCY[car.MAX_GEAR_INDEX].calculate(h, a, t, divisor);
-            }
             float speedKMH = (RPM / GEAR_RATIO / FINAL_DRIVE) * TyreCircumference * 0.00006f;
             /*
                 ρ = air density [kg/m3] ≈ 1.202 kg/m3, at sea level and at 15o C

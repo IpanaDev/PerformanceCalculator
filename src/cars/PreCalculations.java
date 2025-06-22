@@ -17,8 +17,8 @@ public class PreCalculations {
         float firstNode = tireIndex == 0 ? axlePair1.Front : axlePair1.Rear;
         if (dynamic) {
             float[] NEW_ARRAY = new float[4];
-            for (int i = 0; i < NEW_ARRAY.length-1; i++) {
-                float node = tireIndex == 0 ? array[i].Front : array[i].Rear;
+            for (int i = 0; i < NEW_ARRAY.length - 1; i++) {
+                float node = tireIndex == 0 ? array[i + 1].Front : array[i + 1].Rear;
                 NEW_ARRAY[i] = 1.5f*node - 0.5f*firstNode;
             }
             NEW_ARRAY[3] = 150*firstNode;

@@ -13,12 +13,9 @@ import cars.Overall;
 import performance.*;
 import ui.UI;
 
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class PerfCalculator {
     private static final int CORE_COUNT = Runtime.getRuntime().availableProcessors();

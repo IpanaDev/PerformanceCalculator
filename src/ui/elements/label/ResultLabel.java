@@ -24,7 +24,7 @@ public class ResultLabel {
 
     public ResultLabel(PerformanceMenu menu, int x, int y, int width, int height) {
         this.labels = new ArrayList<>();
-        String[] labelNames = {"Engine","Turbo","Transmission","Suspension","Brakes","Tires","Rating","Stats","Node Gains","Cost","Nos Level","Time"};
+        String[] labelNames = {"Engine","Turbo","Transmission","Suspension","Brakes","Tires","Rating","Stats","Node Gains","Cost","Nos Level", "Mass", "Time"};
         int posX = x;
         int posY = y;
         for (int i = 0; i < labelNames.length; i++) {

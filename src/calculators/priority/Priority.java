@@ -48,7 +48,7 @@ public enum Priority {
                             Result.cost(engine,turbo,trans,suspension,brakes,tires) < result.cost()
     ),
     TOP_SPEED_KMH("Speed KMH", (result, tGain, aGain, hGain, additionalValue, tStat, aStat, hStat, engine, turbo, trans, suspension, brakes, tires) ->
-            result.realTopSpeed() < additionalValue  ||
+            result.realTopSpeed() < additionalValue ||
                     result.realTopSpeed() == additionalValue && Result.cost(engine,turbo,trans,suspension,brakes,tires) < result.cost()),
     ACCEL("Acceleration", (result, tGain, aGain, hGain, additionalValue, tStat, aStat, hStat, engine, turbo, trans, suspension, brakes, tires) ->
             result.acceleration() < additionalValue  ||

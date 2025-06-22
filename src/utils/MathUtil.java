@@ -13,7 +13,7 @@ public class MathUtil {
         return bd.floatValue() == bd.intValue() ? String.valueOf(bd.intValue()) : String.valueOf(bd.floatValue());
     }
     public static double roundUp(double value, int places) {
-        return rounding(value, places).intValue();
+        return rounding(value, places).doubleValue();
     }
     public static float roundUp(float value, int places) {
         return rounding(value, places).floatValue();

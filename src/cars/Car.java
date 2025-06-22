@@ -6,9 +6,7 @@ import cars.value.FloatValue;
 import cars.value.IValue;
 import config.ConfigFile;
 import vaultlib.core.types.EAReflection.Float;
-import vaultlib.core.types.attrib.RefSpec;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Car {
@@ -70,9 +68,7 @@ public class Car {
         MASS = PreCalculations.preCalculations(mass);
         COEFFICIENT = PreCalculations.preCalculations(coefficient);
         GEAR_RATIO = PreCalculations.preCalculationsArray(gearRatio);
-        if (gearEfficiency != null) {
-            GEAR_EFFICIENCY = PreCalculations.preCalculationsArray(gearEfficiency);
-        }
+        GEAR_EFFICIENCY = PreCalculations.preCalculationsArray(gearEfficiency);
         for (int i = 0; i < torque.array.length; i++) {
             torque.array[i] *= 1.3558f; //Converting to Nm
         }
