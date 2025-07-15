@@ -20,6 +20,7 @@ public class Car {
     public IValue RIM_SIZE, SECTION_WIDTH, ASPECT_RATIO, FINAL_DRIVE, RPM, MASS, COEFFICIENT;
     public IValue[] GEAR_RATIO, GEAR_EFFICIENCY, TORQUE;
     public int MAX_GEAR_INDEX;
+    public boolean hasPVehicle;
 
     public Car(String vltName, String fullName) {
         this.vltName = vltName;

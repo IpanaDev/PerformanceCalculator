@@ -26,7 +26,7 @@ public class CarLoader {
 
     public static void init() throws Exception {
         File gameDir = new File(String.valueOf(ConfigFile.GAME_LOCATION.value()));
-        File data = new File(gameDir, ".data\\b2d5f170c62d6e37ac67c04be2235249");
+        File data = new File(gameDir, Main.SERVER_DATA);
         readCarNames(data);
         Database database = Main.DB;
         VltClass pvehicleClass = database.FindClass("pvehicle");
@@ -39,6 +39,8 @@ public class CarLoader {
         readEngine(database, engineClass);
         readTires(database, tiresClass);
         readTransmission(database, transmissionClass);
+
+        CARS.removeIf(car -> !car.hasPVehicle);
         for (Car car : CARS) {
             car.setupPreValues();
         }
@@ -147,6 +149,8 @@ public class CarLoader {
                 fillKeys(ENGINE_KEYS, engine, car);
                 fillKeys(TIRES_KEYS, tires, car);
                 fillKeys(TRANSMISSION_KEYS, transmission, car);
+
+                car.hasPVehicle = true;
             }
         }
     }

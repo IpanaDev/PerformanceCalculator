@@ -17,7 +17,8 @@ import javax.swing.*;
 import java.io.*;
 
 public class Main {
-    public static final String BUILD = "1.9";
+    public static final String SERVER_DATA = ".data\\b2d5f170c62d6e37ac67c04be2235249";
+    public static final String BUILD = "2.0";
     public static Database DB;
     
     public static void main(String[] args) {
@@ -31,7 +32,7 @@ public class Main {
                 DB = new Database(new DatabaseOptions(gameId, DatabaseType.X86Database));
                 VaultInit.init(DB.Options.Type);
                 File gameDir = new File(String.valueOf(ConfigFile.GAME_LOCATION.value()));
-                File data = new File(gameDir, ".data\\b2d5f170c62d6e37ac67c04be2235249");
+                File data = new File(gameDir, SERVER_DATA);
                 String directory = data.getAbsolutePath() + "\\GLOBAL";
                 WorldProfile profile = new WorldProfile();
                 profile.LoadFiles(DB, directory, LoaderType.MAIN, "attributes.bin", "commerce.bin");

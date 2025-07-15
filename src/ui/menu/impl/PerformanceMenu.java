@@ -118,7 +118,7 @@ public class PerformanceMenu extends Menu {
 
 
         JTextField searchCar = gui().createTextField("", 20, 20, 380, 25);
-        JTextField customOA = gui().createTextField("", 212, 472, 167, 25);
+        JTextField customOA = gui().createTextField("", 212, 520, 167, 25);
         customOA.setDocument(new NumberDocument());
         customOA.setHorizontalAlignment(SwingConstants.CENTER);
         customOA.setVisible(false);

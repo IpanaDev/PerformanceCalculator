@@ -1,5 +1,6 @@
 package config;
 
+import main.Main;
 import ui.UI;
 
 import java.io.*;
@@ -31,7 +32,7 @@ public class ConfigFile {
         String gameFolder = String.valueOf(valueFromName("Game Location"));
         File nfsw = new File(gameFolder, "nfsw.exe");
         File GLOBAL = new File(gameFolder, "GLOBAL");
-        File data = new File(gameFolder, ".data\\b2d5f170c62d6e37ac67c04be2235249");
+        File data = new File(gameFolder, Main.SERVER_DATA);
         return CONFIG_FILE.exists() && (!nfsw.exists() || !GLOBAL.exists() || !data.exists());
     }
 
