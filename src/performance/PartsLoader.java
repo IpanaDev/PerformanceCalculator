@@ -51,11 +51,14 @@ public class PartsLoader {
         List<VltCollection> collections = database.rowManager.EnumerateCollections(vltClass.Name);
         for (VltCollection collection : collections) {
             String[] splitName = collection.Name.split("_");
+            if (splitName.length < 5) {
+                continue;
+            }
             Type type = getType(splitName[2]);
             Color color = getColor(splitName[1]);
             Brand brand = getBrand(splitName[4]);
             int star = getStar(splitName[3]);
-            if (type != null && color != null && star != 0 && brand != null) {
+            if (splitName[0].equals("t0") && type != null && color != null && star != 0 && brand != null) {
                 Int32 topspeed = collection.GetExactValue("topspeed");
                 Int32 acceleration = collection.GetExactValue("acceleration");
                 Int32 handling = collection.GetExactValue("handling");

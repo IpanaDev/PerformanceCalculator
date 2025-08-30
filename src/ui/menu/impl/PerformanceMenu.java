@@ -91,7 +91,7 @@ public class PerformanceMenu extends Menu {
                         resultLabel.setLabelText(8, "T: " + result.tGain() + ", A: " + result.aGain() + ", H: " + result.hGain());
                         resultLabel.setLabelText(9, result.costString());
                         resultLabel.setLabelText(10, car.nosLevel());
-                        resultLabel.setLabelText(11, String.valueOf(car.MASS.calculate(result.tGain(), result.aGain(), result.hGain(), 150 + result.tGain() + result.aGain() + result.hGain())));
+                        resultLabel.setLabelText(11, String.valueOf(car.MASS.calculate(result.hGain(), result.aGain(), result.tGain(), 150 + result.tGain() + result.aGain() + result.hGain())));
                         resultLabel.setLabelText(12, "Took " + result.time() + "ms");
                         detailedLabel.calcAndSet(result, (Car) selectedCar.getModel().getSelectedItem());
                         find.setText("Find");
