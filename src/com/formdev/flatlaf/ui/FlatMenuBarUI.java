@@ -208,7 +208,7 @@ public class FlatMenuBarUI
 		if( !(background instanceof UIResource) )
 			return null;
 
-		// paint background if menu bar is not the "main" menu bar (e.g. in internal frame)
+		// paint background if menu bar is not the "me.ipana.main" menu bar (e.g. in internal frame)
 		JRootPane rootPane = SwingUtilities.getRootPane( c );
 		if( rootPane == null || !(rootPane.getParent() instanceof Window) || rootPane.getJMenuBar() != c )
 			return background;
@@ -229,7 +229,7 @@ public class FlatMenuBarUI
 	static boolean useUnifiedBackground( Component c ) {
 		// check whether:
 		// - TitlePane.unifiedBackground is true and
-		// - menu bar is the "main" menu bar and
+		// - menu bar is the "me.ipana.main" menu bar and
 		// - window root pane has custom decoration style
 
 		JRootPane rootPane;

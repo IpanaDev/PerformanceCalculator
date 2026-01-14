@@ -270,7 +270,7 @@ public class FlatNativeWindowBorder
 		try {
 /*
 			Class<?> cls = Class.forName( "com.formdev.flatlaf.natives.jna.windows.FlatWindowsNativeWindowBorder" );
-			java.lang.reflect.Method m = cls.getMethod( "getInstance" );
+			java.me.ipana.lang.reflect.Method m = cls.getMethod( "getInstance" );
 			setNativeProvider( (Provider) m.invoke( null ) );
 */
 			setNativeProvider( FlatWindowsNativeWindowBorder.getInstance() );

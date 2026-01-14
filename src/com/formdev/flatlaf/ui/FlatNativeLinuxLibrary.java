@@ -62,7 +62,7 @@ class FlatNativeLinuxLibrary
 /*
 		try {
 			Class<?> cls = Class.forName( "com.formdev.flatlaf.natives.jna.linux.X11WmUtils" );
-			java.lang.reflect.Method m = cls.getMethod( "xMoveOrResizeWindow", Window.class, int.class, int.class, int.class );
+			java.me.ipana.lang.reflect.Method m = cls.getMethod( "xMoveOrResizeWindow", Window.class, int.class, int.class, int.class );
 			return (Boolean) m.invoke( null, window, pt.x, pt.y, direction );
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -78,7 +78,7 @@ class FlatNativeLinuxLibrary
 /*
 		try {
 			Class<?> cls = Class.forName( "com.formdev.flatlaf.natives.jna.linux.X11WmUtils" );
-			java.lang.reflect.Method m = cls.getMethod( "xShowWindowMenu", Window.class, int.class, int.class );
+			java.me.ipana.lang.reflect.Method m = cls.getMethod( "xShowWindowMenu", Window.class, int.class, int.class );
 			return (Boolean) m.invoke( null, window, pt.x, pt.y );
 		} catch (Exception ex) {
 			ex.printStackTrace();

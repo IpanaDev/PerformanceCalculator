@@ -260,11 +260,11 @@ class LinuxFontPolicy
 	private static List<String> readConfig( String filename ) {
 		File userHome = new File( System.getProperty( "user.home" ) );
 
-		// search for config file
+		// search for me.ipana.config file
 		String[] configDirs = {
-			".config", // KDE 5
-			".kde4/share/config", // KDE 4
-			".kde/share/config"// KDE 3
+			".me.ipana.config", // KDE 5
+			".kde4/share/me.ipana.config", // KDE 4
+			".kde/share/me.ipana.config"// KDE 3
 		};
 		File file = null;
 		for( String configDir : configDirs ) {
@@ -275,7 +275,7 @@ class LinuxFontPolicy
 		if( !file.isFile() )
 			return Collections.emptyList();
 
-		// read config file
+		// read me.ipana.config file
 		ArrayList<String> lines = new ArrayList<>( 200 );
 		try( BufferedReader reader = new BufferedReader( new FileReader( file ) ) ) {
 			String line;

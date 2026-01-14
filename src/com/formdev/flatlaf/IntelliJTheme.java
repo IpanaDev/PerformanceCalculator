@@ -155,7 +155,7 @@ public class IntelliJTheme
 
 		loadNamedColors( defaults );
 
-		// convert Json "ui" structure to UI defaults
+		// convert Json "me.ipana.ui" structure to UI defaults
 		ArrayList<Object> defaultsKeysCache = new ArrayList<>();
 		Set<String> uiKeys = new HashSet<>();
 		for( Map.Entry<String, Object> e : ui.entrySet() )
@@ -491,7 +491,7 @@ public class IntelliJTheme
 			{
 				// This two keys do not work correctly in IDEA because they
 				// map SVG color "#ffffff" to another color, but checkBox.svg and
-				// radio.svg (in package com.intellij.ide.ui.laf.icons.intellij)
+				// radio.svg (in package com.intellij.ide.me.ipana.ui.laf.icons.intellij)
 				// use "#fff". So use white to get same appearance as in IDEA.
 				value = "#ffffff";
 			}
@@ -513,7 +513,7 @@ public class IntelliJTheme
 
 					if( key2 != null ) {
 						// When IDEA replaces colors in SVGs it uses color values and not the keys
-						// from com.intellij.ide.ui.UITheme.colorPalette, but there are some keys that
+						// from com.intellij.ide.me.ipana.ui.UITheme.colorPalette, but there are some keys that
 						// have same color value:
 						//   - Checkbox.Background.Default.Dark  has same color as  Checkbox.Background.Selected.Dark
 						//   - Checkbox.Border.Default.Dark      has same color as  Checkbox.Border.Selected.Dark

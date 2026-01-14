@@ -104,7 +104,7 @@ public class UIScale
 			jreHiDPI = true;
 		} else if( SystemInfo.isJetBrainsJVM ) {
 			// IntelliJ IDEA ships its own JetBrains Java 8 JRE that may support per-monitor scaling
-			// see com.intellij.ui.JreHiDpiUtil.isJreHiDPIEnabled()
+			// see com.intellij.me.ipana.ui.JreHiDpiUtil.isJreHiDPIEnabled()
 			try {
 				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 				Class<?> sunGeClass = Class.forName( "sun.java2d.SunGraphicsEnvironment" );
