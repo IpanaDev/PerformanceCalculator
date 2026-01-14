@@ -19,7 +19,7 @@ import java.io.*;
 
 public class Main {
     public static final String SERVER_DATA = ".data\\b2d5f170c62d6e37ac67c04be2235249";
-    public static final String BUILD = "2.0";
+    public static final String BUILD = "2.2";
     public static Database DB;
     
     public static void main(String[] args) {
