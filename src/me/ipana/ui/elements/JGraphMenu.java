@@ -2,6 +2,7 @@ package me.ipana.ui.elements;
 
 import me.ipana.calculator.result.Result;
 import me.ipana.car.Car;
+import me.ipana.car.value.Blender;
 import me.ipana.ui.GraphUI;
 import me.ipana.ui.elements.label.ResultLabel;
 import me.ipana.utils.MathUtil;
@@ -118,51 +119,40 @@ public class JGraphMenu extends JPanel {
     private void setupStaticValues() {
         Result result = resultLabel.result;
         Car car = resultLabel.car;
-        int tGain = result.engine().tGain() + result.turbo().tGain() + result.trans().tGain() + result.suspension().tGain() + result.brakes().tGain() + result.tires().tGain();
-        int aGain = result.engine().aGain() + result.turbo().aGain() + result.trans().aGain() + result.suspension().aGain() + result.brakes().aGain() + result.tires().aGain();
-        int hGain = result.engine().hGain() + result.turbo().hGain() + result.trans().hGain() + result.suspension().hGain() + result.brakes().hGain() + result.tires().hGain();
-        float t = tGain;
-        float a = aGain;
-        float h = hGain;
-        if (tGain < 0) {
-            float m = 150.0f / (150 + tGain);
-            a *= m;
-            h *= m;
-            t = 0;
-        }
-        if (aGain < 0) {
-            float m = 150.0f / (150 + aGain);
-            t *= m;
-            h *= m;
-            a = 0;
-        }
-        if (hGain < 0) {
-            float m = 150.0f / (150 + hGain);
-            t *= m;
-            a *= m;
-            h = 0;
-        }
-        float divisor = 150 + t + a + h;
-        float FINAL_DRIVE = car.FINAL_DRIVE.calculate(h, a, t, divisor);
-        RPM = car.RPM.calculate(h, a, t, divisor);
-        float TORQUE_SPLIT = car.TORQUE_SPLIT.calculate(h, a, t, divisor);
-        float WHEEL_RADIUS_F = car.RIM_SIZE_FRONT.calculate(h, a, t, divisor) + car.SECTION_WIDTH_FRONT.calculate(h, a, t, divisor) * car.ASPECT_RATIO_FRONT.calculate(h, a, t, divisor) / 50;
-        float WHEEL_RADIUS_R = car.RIM_SIZE_REAR.calculate(h, a, t, divisor) + car.SECTION_WIDTH_REAR.calculate(h, a, t, divisor) * car.ASPECT_RATIO_REAR.calculate(h, a, t, divisor) / 50;
+        float tGain = result.engine().tGain() + result.turbo().tGain() + result.trans().tGain() + result.suspension().tGain() + result.brakes().tGain() + result.tires().tGain();
+        float aGain = result.engine().aGain() + result.turbo().aGain() + result.trans().aGain() + result.suspension().aGain() + result.brakes().aGain() + result.tires().aGain();
+        float hGain = result.engine().hGain() + result.turbo().hGain() + result.trans().hGain() + result.suspension().hGain() + result.brakes().hGain() + result.tires().hGain();
+        float sum = tGain + aGain + hGain;
+        float scale = 3f / (300f + 2f * sum);
+
+        float tp = Math.max(0f, tGain);
+        float ap = Math.max(0f, aGain);
+        float hp = Math.max(0f, hGain);
+
+        float t = tp * scale;
+        float a = ap * scale;
+        float h = hp * scale;
+        float hatConstant = 1f - (tp + ap + hp) * scale;
+        float FINAL_DRIVE = Blender.blend(hatConstant, h, a, t, car.finalGear);
+        RPM = Blender.blend(hatConstant, h, a, t, car.rpm);
+        float TORQUE_SPLIT = Blender.blend(hatConstant, h, a, t, car.torqueSplit);
+        float WHEEL_RADIUS_F = Blender.blendFront(hatConstant, h, a, t, car.rimSize) + Blender.blendFront(hatConstant, h, a, t, car.sectionWidth) * Blender.blendFront(hatConstant, h, a, t, car.aspectRatio) / 50;
+        float WHEEL_RADIUS_R = Blender.blendRear(hatConstant, h, a, t, car.rimSize) + Blender.blendRear(hatConstant, h, a, t, car.sectionWidth) * Blender.blendRear(hatConstant, h, a, t, car.aspectRatio) / 50;
         WHEEL_RADIUS = TORQUE_SPLIT <= 0 ? WHEEL_RADIUS_R : TORQUE_SPLIT >= 1 ? WHEEL_RADIUS_F : Math.min(WHEEL_RADIUS_F, WHEEL_RADIUS_R);
-        MASS = car.MASS.calculate(h, a, t, divisor);
-        COEFFICIENT = car.COEFFICIENT.calculate(h, a, t, divisor);
+        MASS = Blender.blend(hatConstant, h, a, t, car.mass);
+        COEFFICIENT = Blender.blend(hatConstant, h, a, t, car.coefficient);
         TyreCircumference = (float) (Math.PI * WHEEL_RADIUS);
-        float MAX_GEAR_RATIO = car.GEAR_RATIO[car.MAX_GEAR_INDEX].calculate(h, a, t, divisor);
+        float MAX_GEAR_RATIO = Blender.blend(hatConstant, h, a, t, car.gearRatio, car.MAX_GEAR_INDEX);
         MAX_SPEED = (RPM / MAX_GEAR_RATIO / FINAL_DRIVE) * TyreCircumference * 0.00006f;
         this.finalNodes = new FinalNode[7];
         for (int i = 2; i < 9; i++) {
             FinalNode finalNode = new FinalNode();
-            finalNode.GEAR_RATIO = car.GEAR_RATIO[i].calculate(h, a, t, divisor);
+            finalNode.GEAR_RATIO = Blender.blend(hatConstant, h, a, t, car.gearRatio, i);
             if (finalNode.GEAR_RATIO <= 0) {
                 continue;
             }
-            finalNode.ENGINE_TORQUE = car.TORQUE[i].calculate(h, a, t, divisor);
-            finalNode.GEAR_EFFICIENCY = car.GEAR_EFFICIENCY[i].calculate(h, a, t, divisor);
+            finalNode.ENGINE_TORQUE = Blender.blend(hatConstant, h, a, t, car.torque, i);
+            finalNode.GEAR_EFFICIENCY = Blender.blend(hatConstant, h, a, t, car.gearEfficiency, i);
             finalNode.WHEEL_TORQUE = finalNode.ENGINE_TORQUE * finalNode.GEAR_RATIO * FINAL_DRIVE * finalNode.GEAR_EFFICIENCY;
             finalNode.speedKMH = (RPM / finalNode.GEAR_RATIO / FINAL_DRIVE) * TyreCircumference * 0.00006f;
             finalNodes[i-2] = finalNode;

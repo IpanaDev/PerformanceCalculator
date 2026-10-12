@@ -55,8 +55,8 @@ public enum Priority {
                     result.acceleration() == additionalValue && Result.cost(engine,turbo,trans,suspension,brakes,tires) < result.cost());
 
 
-    private String fullName;
-    private OctaBoolConsumer function;
+    private final String fullName;
+    private final OctaBoolConsumer function;
 
     Priority(String fullName, OctaBoolConsumer function) {
         this.fullName = fullName;

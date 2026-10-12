@@ -6,6 +6,7 @@ import me.ipana.calculator.result.Result;
 import me.ipana.car.Car;
 import me.ipana.car.CarLoader;
 import me.ipana.car.Overall;
+import me.ipana.car.value.Blender;
 import me.ipana.parts.PerfPart;
 import me.ipana.parts.ValueFilter;
 import me.ipana.ui.GraphUI;
@@ -90,7 +91,7 @@ public class PerformanceMenu extends Menu {
                         resultLabel.setLabelText(8, "T: " + result.tGain() + ", A: " + result.aGain() + ", H: " + result.hGain());
                         resultLabel.setLabelText(9, result.costString());
                         resultLabel.setLabelText(10, car.nosLevel());
-                        resultLabel.setLabelText(11, String.valueOf(car.MASS.calculate(result.hGain(), result.aGain(), result.tGain(), 150 + result.tGain() + result.aGain() + result.hGain())));
+                        resultLabel.setLabelText(11, String.valueOf(Blender.blend(result.hGain(), result.aGain(), result.tGain(), car.mass)));
                         resultLabel.setLabelText(12, "Took " + result.time() + "ms");
                         detailedLabel.calcAndSet(result, (Car) selectedCar.getModel().getSelectedItem());
                         find.setText("Find");

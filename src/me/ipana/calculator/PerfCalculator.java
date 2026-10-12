@@ -16,12 +16,13 @@ import me.ipana.parts.Type;
 import me.ipana.parts.ValueFilter;
 import me.ipana.ui.UI;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 public class PerfCalculator {
     private static final int CORE_COUNT = Runtime.getRuntime().availableProcessors();
+    private static final ExecutorService THREAD = Executors.newWorkStealingPool(CORE_COUNT);
     public float tValue0, tValue1, tValue2, tValue3;
     public float aValue0, aValue1, aValue2, aValue3;
     public float hValue0, hValue1, hValue2, hValue3;
@@ -53,10 +54,10 @@ public class PerfCalculator {
         int aGain = engine.aGain() + turbo.aGain() + trans.aGain() + suspension.aGain() + brakes.aGain() + tires.aGain();
         int hGain = engine.hGain() + turbo.hGain() + trans.hGain() + suspension.hGain() + brakes.hGain() + tires.hGain();
 
-        float commonDivisor = 150 + tGain + aGain + hGain;
-        float tStat = (tGain * tValue0 + aGain * tValue1 + hGain * tValue2 + tValue3) / commonDivisor;
-        float aStat = (tGain * aValue0 + aGain * aValue1 + hGain * aValue2 + aValue3) / commonDivisor;
-        float hStat = (tGain * hValue0 + aGain * hValue1 + hGain * hValue2 + hValue3) / commonDivisor;
+        float commonDivisor = SumCache.INV_1[tGain + aGain + hGain];
+        float tStat = (tGain * tValue0 + aGain * tValue1 + hGain * tValue2 + tValue3) * commonDivisor;
+        float aStat = (tGain * aValue0 + aGain * aValue1 + hGain * aValue2 + aValue3) * commonDivisor;
+        float hStat = (tGain * hValue0 + aGain * hValue1 + hGain * hValue2 + hValue3) * commonDivisor;
         float finalClass = ((int) tStat + (int) aStat + (int) hStat) / 3f;
         int finalClassInt = (int) finalClass;
         final Result result = new Result();
@@ -84,71 +85,95 @@ public class PerfCalculator {
         this.hValue2 = car.hStats()[2];
         this.hValue3 = car.hStats()[3];
         this.overall = overall;
-        final Result result = new Result();
         PerfPart[] engineParts = valueFilter.from(Type.ENGINE);
         PerfPart[] turboParts = valueFilter.from(Type.FORCED_INDUCTION);
         PerfPart[] transParts = valueFilter.from(Type.TRANSMISSION);
         PerfPart[] suspensionParts = valueFilter.from(Type.SUSPENSION);
         PerfPart[] brakeParts = valueFilter.from(Type.BRAKES);
         PerfPart[] tireParts = valueFilter.from(Type.TIRES);
-        ExecutorService THREAD = Executors.newFixedThreadPool(CORE_COUNT);
         PreChecks preChecks = new PreChecks(this);
         ISearch iSearch;
         switch (priority) {
-            case TOP_SPEED_KMH: iSearch = new TopSpeedSearch(); break;
-            case ACCEL: iSearch = new AccelerationSearch(); break;
-            default: iSearch = new DefaultSearch(); break;
+            case TOP_SPEED_KMH:
+                iSearch = new TopSpeedSearch();
+                break;
+            case ACCEL:
+                iSearch = new AccelerationSearch();
+                break;
+            default:
+                iSearch = new DefaultSearch();
+                break;
         }
+        final int lo = overall.min() * 3;
+        final int hi = overall.max() * 3 + 2;
+        boolean limitByBudget = UI.INSTANCE.performanceMenu().limitByBudget.isSelected();
+        int budget = UI.INSTANCE.performanceMenu().budget;
+        List<Callable<Result>> threadResults = new ArrayList<>(engineParts.length);
         for (PerfPart engine : engineParts) {
-            if (preChecks.check(engine, preChecks.engineSum)) {
+            if (preChecks.check(engine, preChecks.engineSum())) {
                 continue;
             }
-            PreChecks subChecks = new PreChecks(this);
-            SumCheck brakeSum = subChecks.brakeSum();
-            THREAD.submit(() -> {
+            threadResults.add(() -> {
+                Result threadResult = new Result();
+                PreChecks subChecks = new PreChecks(this);
+                SumCheck brakeSum = subChecks.brakeSum();
                 subChecks.engineSum().set(engine.tGain(), engine.aGain(), engine.hGain());
                 for (PerfPart turbo : turboParts) {
-                    if (subChecks.check(turbo, subChecks.turboSum)) {
+                    if (subChecks.check(turbo, subChecks.turboSum())) {
                         continue;
                     }
                     for (PerfPart trans : transParts) {
-                        if (subChecks.check(trans, subChecks.transSum)) {
+                        if (subChecks.check(trans, subChecks.transSum())) {
                             continue;
                         }
                         for (PerfPart suspension : suspensionParts) {
-                            if (subChecks.check(suspension, subChecks.suspensionSum)) {
+                            if (subChecks.check(suspension, subChecks.suspensionSum())) {
                                 continue;
                             }
                             for (PerfPart brakes : brakeParts) {
-                                if (subChecks.check(brakes, subChecks.brakeSum)) {
+                                if (subChecks.check(brakes, subChecks.brakeSum())) {
                                     continue;
                                 }
                                 for (PerfPart tires : tireParts) {
+                                    if (limitByBudget && Result.cost(engine, turbo, trans, suspension, brakes, tires) > budget) {
+                                        continue;
+                                    }
                                     int tGain = brakeSum.t() + tires.tGain();
                                     int aGain = brakeSum.a() + tires.aGain();
                                     int hGain = brakeSum.h() + tires.hGain();
-                                    int divisor = 150 + tGain + aGain + hGain;
-                                    float tStat = (tGain * tValue0 + aGain * tValue1 + hGain * tValue2 + tValue3) / divisor;
-                                    float aStat = (tGain * aValue0 + aGain * aValue1 + hGain * aValue2 + aValue3) / divisor;
-                                    float hStat = (tGain * hValue0 + aGain * hValue1 + hGain * hValue2 + hValue3) / divisor;
-                                    int overallStat = ((int) tStat + (int) aStat + (int) hStat) / 3;
-                                    if (overallStat >= overall.min() && overallStat <= overall.max() && (!UI.INSTANCE.performanceMenu().limitByBudget.isSelected() || Result.cost(engine, turbo, trans, suspension, brakes, tires) <= UI.INSTANCE.performanceMenu().budget)) {
-                                        priority.handle(result, tGain, aGain, hGain, iSearch.additionalValue(car, tGain, aGain, hGain), tStat, aStat, hStat, overallStat, engine, turbo, trans, suspension, brakes, tires);
+                                    float divisor = SumCache.INV_1[tGain + aGain + hGain];
+                                    float tStat = (tGain * tValue0 + aGain * tValue1 + hGain * tValue2 + tValue3) * divisor;
+                                    float aStat = (tGain * aValue0 + aGain * aValue1 + hGain * aValue2 + aValue3) * divisor;
+                                    float hStat = (tGain * hValue0 + aGain * hValue1 + hGain * hValue2 + hValue3) * divisor;
+                                    int sum = (int) tStat + (int) aStat + (int) hStat;
+                                    if ((sum - lo | hi - sum) >= 0) {
+                                        priority.handle(threadResult, tGain, aGain, hGain, iSearch.additionalValue(car, tGain, aGain, hGain), tStat, aStat, hStat, sum / 3, engine, turbo, trans, suspension, brakes, tires);
                                     }
                                 }
                             }
                         }
                     }
                 }
+                return threadResult;
             });
         }
-        THREAD.shutdown();
+        final Result finalResult = new Result();
         try {
-            THREAD.awaitTermination(30L, TimeUnit.DAYS);
-        } catch (InterruptedException e) {
+            List<Future<Result>> futures = THREAD.invokeAll(threadResults);
+            for (Future<Result> future : futures) {
+                Result threadResult = future.get(30, TimeUnit.DAYS);
+                priority.handle(
+                        finalResult,
+                        threadResult.tGain(), threadResult.aGain(), threadResult.hGain(),
+                        threadResult.additionalValue(),
+                        threadResult.tStat(), threadResult.aStat(), threadResult.hStat(), threadResult.rating(),
+                        threadResult.engine(), threadResult.turbo(), threadResult.trans(), threadResult.suspension(), threadResult.brakes(), threadResult.tires());
+            }
+            threadResults.clear();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        result.setTime(System.currentTimeMillis() - ms);
-        return result;
+        finalResult.setTime(System.currentTimeMillis() - ms);
+        return finalResult;
     }
 }

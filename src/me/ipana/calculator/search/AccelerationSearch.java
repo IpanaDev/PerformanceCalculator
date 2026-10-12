@@ -1,44 +1,39 @@
 package me.ipana.calculator.search;
 
+import me.ipana.calculator.SumCache;
 import me.ipana.car.Car;
+import me.ipana.car.value.Blender;
 
 public class AccelerationSearch implements ISearch {
     @Override
     public float additionalValue(Car car, int tGain, int aGain, int hGain) {
-        float t = tGain;
-        float a = aGain;
-        float h = hGain;
-        if (tGain < 0) {
-            float m = 150.0f / (150 + tGain);
-            a *= m;
-            h *= m;
-            t = 0;
-        }
-        if (aGain < 0) {
-            float m = 150.0f / (150 + aGain);
-            t *= m;
-            h *= m;
-            a = 0;
-        }
-        if (hGain < 0) {
-            float m = 150.0f / (150 + hGain);
-            t *= m;
-            a *= m;
-            h = 0;
-        }
-        float divisor = 150 + t + a + h;
-        float FINAL_DRIVE = car.FINAL_DRIVE.calculate(h, a, t, divisor);
-        float TORQUE_SPLIT = car.TORQUE_SPLIT.calculate(h, a, t, divisor);
-        float WHEEL_RADIUS_F = car.RIM_SIZE_FRONT.calculate(h, a, t, divisor) + car.SECTION_WIDTH_FRONT.calculate(h, a, t, divisor) * car.ASPECT_RATIO_FRONT.calculate(h, a, t, divisor) / 50;
-        float WHEEL_RADIUS_R = car.RIM_SIZE_REAR.calculate(h, a, t, divisor) + car.SECTION_WIDTH_REAR.calculate(h, a, t, divisor) * car.ASPECT_RATIO_REAR.calculate(h, a, t, divisor) / 50;
+        float scale = SumCache.INV_2[tGain + aGain + hGain];
+
+        float tp = Math.max(0f, tGain);
+        float ap = Math.max(0f, aGain);
+        float hp = Math.max(0f, hGain);
+
+        float t = tp * scale;
+        float a = ap * scale;
+        float h = hp * scale;
+        float hatConstant = 1f - (tp + ap + hp) * scale;
+        float FINAL_DRIVE = Blender.blend(hatConstant, h, a, t, car.finalGear);
+        float TORQUE_SPLIT = Blender.blend(hatConstant, h, a, t, car.torqueSplit);
+        float WHEEL_RADIUS_F = Blender.blendFront(hatConstant, h, a, t, car.rimSize) + Blender.blendFront(hatConstant, h, a, t, car.sectionWidth) * Blender.blendFront(hatConstant, h, a, t, car.aspectRatio) / 50;
+        float WHEEL_RADIUS_R = Blender.blendRear(hatConstant, h, a, t, car.rimSize) + Blender.blendRear(hatConstant, h, a, t, car.sectionWidth) * Blender.blendRear(hatConstant, h, a, t, car.aspectRatio) / 50;
         float WHEEL_RADIUS = TORQUE_SPLIT <= 0 ? WHEEL_RADIUS_R : TORQUE_SPLIT >= 1 ? WHEEL_RADIUS_F : Math.min(WHEEL_RADIUS_F, WHEEL_RADIUS_R);
-        float GEAR_RATIO = car.GEAR_RATIO[car.MAX_GEAR_INDEX].calculate(h, a, t, divisor);
-        float ENGINE_TORQUE = car.TORQUE[car.MAX_GEAR_INDEX].calculate(h, a, t, divisor);
-        float MASS = car.MASS.calculate(h, a, t, divisor);
-        float COEFFICIENT = car.COEFFICIENT.calculate(h, a, t, divisor);
-        float WHEEL_TORQUE = ENGINE_TORQUE * GEAR_RATIO * FINAL_DRIVE;
-        if (car.GEAR_EFFICIENCY != null) {
-            WHEEL_TORQUE *= car.GEAR_EFFICIENCY[car.MAX_GEAR_INDEX].calculate(h, a, t, divisor);
+        float MASS = Blender.blend(hatConstant, h, a, t, car.mass);
+        float COEFFICIENT = Blender.blend(hatConstant, h, a, t, car.coefficient);
+        float ACCELERATION = 0;
+        for (int i = 4; i < 9; i++) {//Skipping first & second gear
+            float GEAR_RATIO =  Blender.blend(hatConstant, h, a, t, car.gearRatio, i);
+            if (GEAR_RATIO == 0)
+                break;
+            float ENGINE_TORQUE = Blender.blend(hatConstant, h, a, t, car.torque, i);
+            float GEAR_EFFICIENCY = Blender.blend(hatConstant, h, a, t, car.gearEfficiency, i);
+            float WHEEL_TORQUE = ENGINE_TORQUE * GEAR_RATIO * FINAL_DRIVE * GEAR_EFFICIENCY;
+            float FORCE = WHEEL_TORQUE / (WHEEL_RADIUS / 1000) - COEFFICIENT;
+            ACCELERATION += FORCE / MASS;
         }
         /*
             ρ = air density [kg/m3] ≈ 1.202 kg/m3, at sea level and at 15o C
@@ -51,7 +46,6 @@ public class AccelerationSearch implements ISearch {
 
             p and Af is unknown, but they are static no need to include in iteration
          */
-        float FORCE = WHEEL_TORQUE / (WHEEL_RADIUS / 1000) - COEFFICIENT;
-        return FORCE / MASS;
+        return ACCELERATION;
     }
 }

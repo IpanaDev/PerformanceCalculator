@@ -2,7 +2,7 @@ package me.ipana.calculator.checks;
 
 public class SumCheck {
     private int topSpeed, acceleration, handling;
-    private SumCheck prevSum;
+    private final SumCheck prevSum;
 
     public SumCheck(SumCheck prevSum) {
         this.prevSum = prevSum;

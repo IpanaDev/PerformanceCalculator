@@ -6,16 +6,16 @@ import javax.swing.text.NumberFormatter;
 import java.text.ParseException;
 
 public class Result {
-    private volatile PerfPart engine = PerfPart.EMPTY_ENGINE;
-    private volatile PerfPart turbo = PerfPart.EMPTY_TURBO;
-    private volatile PerfPart trans = PerfPart.EMPTY_TRANSMISSION;
-    private volatile PerfPart suspension = PerfPart.EMPTY_SUSPENSION;
-    private volatile PerfPart brakes = PerfPart.EMPTY_BRAKES;
-    private volatile PerfPart tires = PerfPart.EMPTY_TIRES;
-    private volatile float tStat, aStat, hStat, speedKMH, acceleration;
-    private volatile int tGain, aGain, hGain;
-    private volatile int rating;
-    private volatile long time;
+    private PerfPart engine = PerfPart.EMPTY_ENGINE;
+    private PerfPart turbo = PerfPart.EMPTY_TURBO;
+    private PerfPart trans = PerfPart.EMPTY_TRANSMISSION;
+    private PerfPart suspension = PerfPart.EMPTY_SUSPENSION;
+    private PerfPart brakes = PerfPart.EMPTY_BRAKES;
+    private PerfPart tires = PerfPart.EMPTY_TIRES;
+    private float tStat, aStat, hStat, additionalValue;
+    private int tGain, aGain, hGain;
+    private int rating;
+    private long time;
 
     public void set(PerfPart engine, PerfPart turbo, PerfPart trans, PerfPart suspension, PerfPart brakes, PerfPart tires, int tGain, int aGain, int hGain, float additionalValue, float topSpeed, float acceleration, float handling, int rating) {
         this.engine = engine;
@@ -27,8 +27,7 @@ public class Result {
         this.tGain = tGain;
         this.aGain = aGain;
         this.hGain = hGain;
-        this.acceleration = additionalValue;
-        this.speedKMH = additionalValue;
+        this.additionalValue = additionalValue;
         this.tStat = topSpeed;
         this.aStat = acceleration;
         this.hStat = handling;
@@ -96,12 +95,16 @@ public class Result {
         return hStat;
     }
 
+    public float additionalValue() {
+        return additionalValue;
+    }
+
     public float acceleration() {
-        return acceleration;
+        return additionalValue;
     }
 
     public float realTopSpeed() {
-        return speedKMH;
+        return additionalValue;
     }
 
     public int tGain() {

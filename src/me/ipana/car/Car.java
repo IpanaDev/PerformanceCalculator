@@ -3,7 +3,6 @@ package me.ipana.car;
 import me.ipana.car.value.AxlePairValue;
 import me.ipana.car.value.FloatArrayValue;
 import me.ipana.car.value.FloatValue;
-import me.ipana.car.value.IValue;
 import me.ipana.config.ConfigFile;
 import vaultlib.core.types.EAReflection.Float;
 
@@ -17,8 +16,6 @@ public class Car {
     private float[] cTStats, cAStats, cHStats;
     private String vltName, fullName;
     private int nosLevel = -1;
-    public IValue RIM_SIZE_FRONT, SECTION_WIDTH_FRONT, ASPECT_RATIO_FRONT, RIM_SIZE_REAR, SECTION_WIDTH_REAR, ASPECT_RATIO_REAR, FINAL_DRIVE, RPM, MASS, COEFFICIENT, TORQUE_SPLIT;
-    public IValue[] GEAR_RATIO, GEAR_EFFICIENCY, TORQUE;
     public int MAX_GEAR_INDEX;
     public boolean hasPVehicle;
 
@@ -54,29 +51,15 @@ public class Car {
         cTStats[cTStats.length-1] = tStats.get(0).GetValue()*150;
         cAStats[cAStats.length-1] = aStats.get(0).GetValue()*150;
         cHStats[cHStats.length-1] = hStats.get(0).GetValue()*150;
-        RPM = PreCalculations.preCalculations(rpm);
         for (AxlePairValue axlePair : rimSize) {
             if (axlePair != null) {
                 axlePair.Front *= 25.4f;
                 axlePair.Rear *= 25.4f;
             }
         }
-        ASPECT_RATIO_FRONT = PreCalculations.preCalculationsTire(true, aspectRatio);
-        SECTION_WIDTH_FRONT = PreCalculations.preCalculationsTire(true, sectionWidth);
-        RIM_SIZE_FRONT = PreCalculations.preCalculationsTire(true, rimSize);
-        ASPECT_RATIO_REAR = PreCalculations.preCalculationsTire(false, aspectRatio);
-        SECTION_WIDTH_REAR = PreCalculations.preCalculationsTire(false, sectionWidth);
-        RIM_SIZE_REAR = PreCalculations.preCalculationsTire(false, rimSize);
-        FINAL_DRIVE = PreCalculations.preCalculations(finalGear);
-        MASS = PreCalculations.preCalculations(mass);
-        COEFFICIENT = PreCalculations.preCalculations(coefficient);
-        GEAR_RATIO = PreCalculations.preCalculationsArray(gearRatio);
-        GEAR_EFFICIENCY = PreCalculations.preCalculationsArray(gearEfficiency);
-        TORQUE_SPLIT = PreCalculations.preCalculations(torqueSplit);
         for (int i = 0; i < torque.array.length; i++) {
             torque.array[i] *= 1.3558f; //Converting to Nm
         }
-        TORQUE = PreCalculations.preCalculationsArray(torque);
         int i = 8;
         while (gearRatio.array[i] == 0) {
             i--;
